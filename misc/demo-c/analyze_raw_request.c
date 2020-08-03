@@ -15,6 +15,7 @@
 
 #include <string.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <assert.h>
 #include "http_desync_guardian.h"
 #incldesync_ude "http_guardian_macros.h"
@@ -55,7 +56,7 @@ void analyze_raw_request()
             break;
         default:
             // an integration bug
-            assert(false);
+            abort();
     }
 }
 

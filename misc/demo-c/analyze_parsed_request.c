@@ -15,6 +15,7 @@
 
 #include <string.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <assert.h>
 #include <time.h>
 #include "defs.h"
@@ -27,9 +28,9 @@
 const bool client_prefers_to_send_ambiguous_requests = true;
 const bool client_prefers_to_debug_request_data = true;
 
-const HDG_STRING_t PUT = HDG_STRING("PUT");
-const HDG_STRING_t HTTP1_1 = HDG_STRING("HTTP/1.1");
-const HDG_STRING_t URI = HDG_STRING("/foo/bar");
+const http_desync_guardian_string_t PUT = HDG_STRING("PUT");
+const http_desync_guardian_string_t HTTP1_1 = HDG_STRING("HTTP/1.1");
+const http_desync_guardian_string_t URI = HDG_STRING("/foo/bar");
 
 void check_headers(http_desync_guardian_request_t *request_data);
 
@@ -66,7 +67,7 @@ void analyze_request(http_desync_guardian_request_t *request_data)
             break;
         default:
             // an integration bug
-            assert(false);
+            abort();
     }
 }
 
@@ -114,7 +115,7 @@ void log_tier_metrics(uint32_t len, const http_desync_guardian_tier_count_t *tie
                 break;
             default:
                 // an integration bug
-                assert(false);
+                abort();
         }
         printf("[%ld] Method: \"%.*s\", Type: %s, Count: %d\n",
                current_time,
@@ -187,7 +188,7 @@ void check_headers(http_desync_guardian_request_t *request_data)
                 break;
             default:
                 // an integration bug
-                assert(false);
+                abort();
         }
     }
 }
@@ -198,7 +199,7 @@ int construct_http_desync_guardian_request(http_desync_guardian_request_t *reque
     request_data->version = HTTP1_1;
     request_data->uri = URI;
 
-    static HDG_STRING_t empty_string = {.length = 0, .data_ptr = NULL};
+    static http_desync_guardian_string_t empty_string = {.length = 0, .data_ptr = NULL};
 
     http_desync_guardian_http_header_t headers[] = {
             {
