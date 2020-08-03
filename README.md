@@ -14,6 +14,16 @@ Priorities
 * **Security is efficient when it's easy for users.** Our goal is to make integration of the library as simple as possible.
 * **Ultralight.** The overhead must be minimal and impose no tangible tax on request handling.
 
+Supported HTTP versions
+======
+
+* `HTTP/0.9` - all traffic is classified as `Acceptable`.
+* `HTTP/1.0` - presence of `Transfer-Encoding` is considered `Ambiguous`.
+* `HTTP/1.1` - the main focus of this library
+* `HTTP/2`+ - out of scope. But if your proxy downgrades `HTTP/2` to `HTTP/1.1`, make sure the outgoing request is analyzed. 
+
+See [documentation](./docs) to learn more.
+
 Usage from C
 =====
 

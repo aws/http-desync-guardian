@@ -1,0 +1,33 @@
+@startuml
+
+skinparam backgroundColor #EEEBDC
+
+
+Actor Attacker #red
+Actor User #lime
+Attacker -> Proxy: POST /foo [GET /poison]
+activate Proxy
+Proxy -> Backend: POST /foo
+activate Backend
+Backend x-> Proxy: /foo 200
+deactivate  Backend
+Proxy -> Attacker: /foo 200
+deactivate Proxy
+activate Backend
+Backend x-x Proxy: /poison
+note left
+Connection: close
+Bad response dropped
+end note
+deactivate Backend
+
+deactivate Proxy
+User -> Proxy: GET /bar
+activate Proxy
+Proxy -> Backend: GET /bar
+activate Backend
+Backend --> Proxy: /bar 200
+Proxy --> User: /bar 200
+deactivate Proxy
+deactivate  Backend
+@enduml

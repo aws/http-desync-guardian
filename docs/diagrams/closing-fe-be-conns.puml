@@ -1,0 +1,45 @@
+@startuml
+
+skinparam backgroundColor #EEEBDC
+
+
+Actor Attacker #red
+Actor User #lime
+Attacker -> CDN: POST /foo [GET /poison]
+activate CDN
+CDN -> Proxy: POST /foo
+activate Proxy
+Proxy -> Backend: POST /foo
+activate Backend
+Backend x-> Proxy: /foo 200
+deactivate Backend
+Proxy x-> CDN: /foo 200
+deactivate  Proxy
+CDN -> Attacker: /foo 200
+deactivate CDN
+Proxy -> Backend: GET /poison
+activate Proxy
+activate Backend
+Backend -> Proxy: /poison 200
+deactivate Backend
+Proxy x-x CDN: /poison
+note left
+BE/FE connections closed
+Now the smuggled response is dropped.
+end note
+deactivate Proxy
+
+deactivate CDN
+User -> CDN: GET /bar
+activate CDN
+CDN -> Proxy: GET /bar
+activate Proxy
+Proxy -> Backend: GET /bar
+activate Backend
+Backend -> Proxy: GET /bar 200
+deactivate Backend
+Proxy --> CDN: /bar 200
+CDN --> User: /bar 200
+deactivate CDN
+deactivate  Proxy
+@enduml
