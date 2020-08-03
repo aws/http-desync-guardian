@@ -86,8 +86,10 @@ fn is_bad_http_character(b: u8) -> bool {
     b == CR || b == LF || b == NIL
 }
 
+type TableGenerator = fn(u8) -> bool;
+
 fn generate_lookup_tables() {
-    let tables: &[(&str, fn(u8) -> bool)] = &[
+    let tables: &[(&str, TableGenerator)] = &[
         ("TCHAR_TABLE", |b| is_rfc_tchar(b)),
         ("VCHAR", |b| is_rfc_vchar(b)),
         ("BAD_CHARACTERS", |b| is_bad_http_character(b)),
@@ -113,11 +115,14 @@ fn generate_lookup_tables() {
             /// express or implied. See the License for the specific language governing\n\
             /// permissions and limitations under the License.\n\
             ///\n\
+            \n\
+            /// This source file is auto-generated, do not modify it manually.\n\
+             
             ";
-    file.write(copyright.as_bytes())
+    file.write_all(copyright.as_bytes())
         .expect("Cannot write to file");
     for table in tables {
-        file.write(generate_table(table.0, table.1).as_bytes())
+        file.write_all(generate_table(table.0, table.1).as_bytes())
             .expect("Cannot write to file");
     }
 }
