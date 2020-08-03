@@ -1,13 +1,7 @@
-# This is a template cbindgen.toml file with all of the default values.
-# Some values are commented out because their absence is the real default.
-#
 # See https://github.com/eqrion/cbindgen/blob/master/docs.md#cbindgentoml
 # for detailed documentation of every option here.
 
-
-
 language = "C"
-
 
 ############## Options for Wrapping the Contents of the Header #################
 
@@ -35,9 +29,6 @@ sys_includes = []
 includes = []
 no_includes = false
 
-
-
-
 ############################ Code Style Options ################################
 
 braces = "SameLine"
@@ -45,21 +36,11 @@ line_length = 100
 tab_width = 2
 documentation_style = "auto"
 
-
-
-
-
 ############################# Codegen Options ##################################
 
 style = "type"
 
-
-
 [defines]
-# "target_os = freebsd" = "DEFINE_FREEBSD"
-# "feature = serde" = "DEFINE_SERDE"
-
-
 
 [export]
 include = []
@@ -67,8 +48,6 @@ exclude = []
 prefix = "http_desync_guardian_"
 item_types = []
 renaming_overrides_prefixing = true
-
-
 
 [export.rename]
 "RequestSafetyTier" = "http_desync_guardian_request_safety_tier_t"
@@ -94,26 +73,15 @@ renaming_overrides_prefixing = true
 "SP" = "HTTP_DESYNC_GUARDIAN_SP"
 "COLON" = "HTTP_DESYNC_GUARDIAN_COLON"
 
-
 [export.body]
-
-
-
 
 [fn]
 rename_args = "None"
-# must_use = "MUST_USE_FUNC"
-#prefix = "http_desync_guardian_"
-#postfix = "http_desync_guardian_"
 args = "auto"
 sort_by = "Name"
 
-
-
-
 [struct]
 rename_fields = "None"
-# must_use = "MUST_USE_STRUCT"
 derive_constructor = true
 derive_eq = false
 derive_neq = false
@@ -122,57 +90,35 @@ derive_lte = false
 derive_gt = false
 derive_gte = false
 
-
-
-
 [enum]
 rename_variants = "QualifiedScreamingSnakeCase"
-# must_use = "MUST_USE_ENUM"
 add_sentinel = true
 prefix_with_name = false
 derive_helper_methods = false
 derive_const_casts = false
 derive_mut_casts = false
-# cast_assert_name = "ASSERT"
 derive_tagged_enum_destructor = false
 derive_tagged_enum_copy_constructor = false
 enum_class = false
 private_default_tagged_enum_constructor = false
 
-
-
-
 [const]
 allow_static_const = true
 
-
-
-
 [macro_expansion]
 bitflags = false
-
-
-
-
-
 
 ############## Options for How Your Rust library Should Be Parsed ##############
 
 [parse]
 parse_deps = false
-# include = []
 exclude = []
 clean = false
 extra_bindings = []
-
-
 
 [parse.expand]
 crates = []
 all_features = false
 default_features = true
 features = []
-
-
-
 

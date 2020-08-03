@@ -1,15 +1,15 @@
 Overview
 ========
 
-A library to screen HTTP requests to avoid HTTP Desync attacks.
-It can be used to analyze raw HTTP request headers or already parsed by an HTTP engine.
+`http_desync_guardian` library is designed to analyze HTTP requests to prevent HTTP Desync attacks.
+It can be used to either for raw HTTP request headers or already parsed by an HTTP engine.
 Consumers may configure logging and metrics collection.
 Logging is rate limited and all user data is obfuscated. 
 
 Priorities
 =======
 
-* **Uniformity across services is key.** This means request classification, logging, and metrics must happen under the hood and with minimal available settings (e.g., such as log file destination).
+* **Uniformity across services is key.** This means request classification, logging, and metrics must happen under the hood and with minimally available settings (e.g., such as log file destination).
 * **Focus on reviewability.** The test suite must require no knowledge about the library/programming languages but only about HTTP protocol. So it's easy to review, contribute, and re-use.
 * **Security is efficient when it's easy for users.** Our goal is to make integration of the library as simple as possible.
 * **Ultralight.** The overhead must be minimal and impose no tangible tax on request handling.
