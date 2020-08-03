@@ -1,11 +1,10 @@
 Overview
 ========
 
-A library to screen HTTP requests to avoid HTTP Desync attacks, according to:
-
-1. Request splitting and smuggling https://tools.ietf.org/html/rfc7230#page-69
-1. Message body length  https://tools.ietf.org/html/rfc7230#section-3.3.3
-1. https://portswigger.net/research/http-desync-attacks-request-smuggling-reborn
+A library to screen HTTP requests to avoid HTTP Desync attacks.
+It can be used to analyze raw HTTP request headers or already parsed by an HTTP engine.
+Consumers may configure logging and metrics collection.
+Logging is rate limited and all user data is obfuscated. 
 
 Priorities
 =======
