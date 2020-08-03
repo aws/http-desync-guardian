@@ -61,6 +61,9 @@ static int check_request(http_engine_request_t *req) {
         case REQUEST_SAFETY_TIER_SEVERE:
             // Send 400 and close the FE connection.
             break;
+        default:
+            // unreachable code
+            abort();
     }
 }
 ```
@@ -76,4 +79,4 @@ See [CONTRIBUTING](CONTRIBUTING.md#security-issue-notifications) for more inform
 
 ## License
 
-This project is licensed under the Apache-2.0 License.
+This project is licensed under the [Apache-2.0 License](./LICENSE).
