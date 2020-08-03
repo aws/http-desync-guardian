@@ -1,0 +1,542 @@
+#
+# Test-cases when the body length is ambiguous.
+# The proxy should either reject such requests, or close both FE/BE connections
+# immediately after the response was sent.
+#
+
+- name: 'Transfer-Encoding with a trailing space in name'
+  uri: /foo/bar
+  method: POST
+  version: HTTP/1.1
+  headers:
+    - name: "Transfer-Encoding "
+      value: chunked
+      tier: NonCompliant
+  expected:
+    tier: Ambiguous
+    reason: SuspiciousHeader
+    required_message_items:
+      - "Transfer-Encoding"
+
+- name: 'Transfer-Encoding with a trailing tab in name'
+  uri: /foo/bar
+  method: POST
+  version: HTTP/1.1
+  headers:
+    - name: "Transfer-Encoding\t"
+      value: chunked
+      tier: NonCompliant
+  expected:
+    tier: Ambiguous
+    reason: SuspiciousHeader
+    required_message_items:
+      - "Transfer-Encoding"
+
+- name: '\x01Transfer-Encoding with a non-printable character'
+  uri: /foo/bar
+  method: POST
+  version: HTTP/1.1
+  headers:
+    - name: "\x01Transfer-Encoding"
+      value: chunked
+      tier: NonCompliant
+  expected:
+    tier: Ambiguous
+    reason: SuspiciousHeader
+    required_message_items:
+      - "Transfer-Encoding"
+
+- name: '\x01\x01Transfer-Encoding with a non-printable character'
+  uri: /foo/bar
+  method: POST
+  version: HTTP/1.1
+  headers:
+    - name: "\x01\x01Transfer-Encoding"
+      value: chunked
+      tier: NonCompliant
+  expected:
+    tier: Ambiguous
+    reason: SuspiciousHeader
+    required_message_items:
+      - "Transfer-Encoding"
+
+- name: '\x01\x01Content-Length with a non-printable character'
+  uri: /foo/bar
+  method: POST
+  version: HTTP/1.1
+  headers:
+    - name: "\x01\x01Content-Length"
+      value: "1"
+      tier: NonCompliant
+  expected:
+    tier: Ambiguous
+    reason: SuspiciousHeader
+    required_message_items:
+      - "Content-Length"
+
+- name: '\x01Content-Length with a non-printable character'
+  uri: /foo/bar
+  method: POST
+  version: HTTP/1.1
+  headers:
+    - name: "\x01Content-Length"
+      value: "1"
+      tier: NonCompliant
+  expected:
+    tier: Ambiguous
+    reason: SuspiciousHeader
+    required_message_items:
+      - "Content-Length"
+
+- name: 'Transfer-Encoding with a space in the middle'
+  uri: /foo/bar
+  method: POST
+  version: HTTP/1.1
+  headers:
+    - name: "Transfer- Encoding"
+      value: chunked
+      tier: NonCompliant
+  expected:
+    tier: Ambiguous
+    reason: SuspiciousHeader
+    required_message_items:
+      - "Transfer-Encoding"
+      - "Transfer- Encoding"
+
+- name: 'Transfer_Encoding with underscore.'
+  uri: /foo/bar
+  method: POST
+  version: HTTP/1.1
+  headers:
+    - name: "Transfer_Encoding"
+      value: chunked
+      tier: NonCompliant
+  expected:
+    tier: Ambiguous
+    reason: SuspiciousHeader
+    required_message_items:
+      - "Transfer-Encoding"
+      - "Transfer_Encoding"
+
+- name: 'Content_Length with underscore.'
+  uri: /foo/bar
+  method: POST
+  version: HTTP/1.1
+  headers:
+    - name: "Content_Length"
+      value: 1000
+      tier: NonCompliant
+  expected:
+    tier: Ambiguous
+    reason: SuspiciousHeader
+    required_message_items:
+      - "Content-Length"
+      - "Content_Length"
+
+- name: 'Duplicate Content-Length'
+  uri: /foo/bar
+  method: PUT
+  version: HTTP/1.1
+  headers:
+    - name: Content-Length
+      value: 1000
+      tier: Compliant
+    - name: Content-Length
+      value: 1000
+      tier: Bad
+  expected:
+    tier: Ambiguous
+    reason: DuplicateContentLength
+    required_message_items:
+      - "Content-Length"
+
+- name: 'Both Transfer-Encoding:chunked and Content-Length'
+  uri: /foo/bar
+  method: POST
+  version: HTTP/1.1
+  headers:
+    - name: Transfer-Encoding
+      value: chunked
+      tier: Compliant
+    - name: Content-Length
+      value: 100
+      tier: Bad
+  expected:
+    tier: Ambiguous
+    reason: BothTeClPresent
+    required_message_items:
+      - "Content-Length"
+
+# https://tools.ietf.org/html/rfc7230#section-3.3.2
+# If a message is received with both a Transfer-Encoding and a
+#  Content-Length header field, the Transfer-Encoding overrides the
+#  Content-Length. Such a message might indicate an attempt to
+#  perform request smuggling (Section 9.5) or response splitting
+#  (Section 9.4) and ought to be handled as an error. A sender MUST
+#  remove the received Content-Length field prior to forwarding such
+#  a message downstream.
+- name: 'Both Transfer-Encoding and Content-Length'
+  uri: /foo/bar
+  method: POST
+  version: HTTP/1.1
+  headers:
+    - name: Transfer-Encoding
+      value: gzip
+      tier: Compliant
+    - name: Content-Length
+      value: 100
+      tier: Bad
+  expected:
+    tier: Ambiguous
+    reason: BothTeClPresent
+    required_message_items:
+      - "Content-Length"
+
+# https://tools.ietf.org/html/rfc7231#section-4.3
+# A payload within a GET/HEAD request message has no defined semantics.
+# https://medium.com/@knownsec404team/protocol-layer-attack-http-request-smuggling-cc654535b6f
+#  3.1 GET Request with CL != 0
+# https://portswigger.net/web-security/request-smuggling/exploiting
+# See "Capturing other users’ requests"
+#  https://www.cgisecurity.com/lib/HTTP-Request-Smuggling.pdf
+# see "EXAMPLE #3"
+- name: 'Get with a body and Content-Length'
+  uri: /foo/bar
+  method: GET
+  version: HTTP/1.1
+  headers:
+    - name: Content-Length
+      value: 1000
+      tier: NonCompliant
+  expected:
+    tier: Ambiguous
+    reason: UndefinedContentLengthSemantics
+    required_message_items:
+      - "Content-Length"
+
+- name: 'Get with a body and Transfer-Encoding'
+  uri: /foo/bar
+  method: GET
+  version: HTTP/1.1
+  headers:
+    - name: Transfer-Encoding
+      value: chunked
+      tier: NonCompliant
+  expected:
+    tier: Ambiguous
+    reason: UndefinedTransferEncodingSemantics
+    required_message_items:
+      - "Transfer-Encoding"
+
+- name: 'Head with a body and Content-Length'
+  uri: /foo/bar
+  method: HEAD
+  version: HTTP/1.1
+  headers:
+    - name: Content-Length
+      value: 1000
+      tier: NonCompliant
+  expected:
+    tier: Ambiguous
+    reason: UndefinedContentLengthSemantics
+    required_message_items:
+      - "Content-Length"
+
+- name: 'Head with a body and Transfer-Encoding'
+  uri: /foo/bar
+  method: HEAD
+  version: HTTP/1.1
+  headers:
+    - name: Transfer-Encoding
+      value: chunked
+      tier: NonCompliant
+  expected:
+    tier: Ambiguous
+    reason: UndefinedTransferEncodingSemantics
+    required_message_items:
+      - "Transfer-Encoding"
+
+- name: 'Transfer-Encoding[white-space] and Content-Length'
+  uri: /foo/bar
+  method: POST
+  version: HTTP/1.1
+  headers:
+    - name: "Transfer-Encoding "
+      value: chunked
+      tier: NonCompliant
+    - name: "Content-Length"
+      value: 1000
+      tier: Bad
+  expected:
+    tier: Ambiguous
+    reason: SuspiciousHeader
+    required_message_items:
+      - "Transfer-Encoding"
+
+- name: '[white-space]Transfer-Encoding and Content-Length'
+  uri: /foo/bar
+  method: POST
+  version: HTTP/1.1
+  headers:
+    - name: " Transfer-Encoding"
+      value: chunked
+      tier: NonCompliant
+    - name: "Content-Length"
+      value: 1000
+      tier: Bad
+  expected:
+    tier: Ambiguous
+    reason: SuspiciousHeader
+    required_message_items:
+      - "Transfer-Encoding"
+
+- name: '[white-space]Transfer-Encoding and [white-space]Content-Length'
+  uri: /foo/bar
+  method: POST
+  version: HTTP/1.1
+  headers:
+    - name: " Transfer-Encoding"
+      value: chunked
+      tier: NonCompliant
+    - name: " Content-Length"
+      value: 1000
+      tier: Bad
+  expected:
+    tier: Ambiguous
+    reason: SuspiciousHeader
+    required_message_items:
+      - "Transfer-Encoding"
+
+- name: 'Transfer-Encoding[white-space] and Content-Length[white-space]'
+  uri: /foo/bar
+  method: POST
+  version: HTTP/1.1
+  headers:
+    - name: "Transfer-Encoding "
+      value: chunked
+      tier: NonCompliant
+    - name: "Content-Length "
+      value: 1000
+      tier: Bad
+  expected:
+    tier: Ambiguous
+    reason: SuspiciousHeader
+    required_message_items:
+      - "Transfer-Encoding"
+
+- name: 'Empty header name'
+  uri: /foo/bar
+  method: POST
+  version: HTTP/1.1
+  headers:
+    - name: ''
+      value: chunked
+      tier: Bad
+    - name: "Content-Length"
+      value: 1000
+      tier: Compliant
+  expected:
+    tier: Ambiguous
+    reason: EmptyHeader
+
+- name: 'Header name starts with :'
+  uri: /foo/bar
+  method: POST
+  version: HTTP/1.1
+  headers:
+    - name: ':SomeHeader:Transfer-Encoding:'
+      value: chunked
+      tier: Bad
+    - name: "Content-Length"
+      value: 1000
+      tier: Compliant
+  expected:
+    tier: Ambiguous
+    reason: EmptyHeader
+
+- name: 'Only white-spaces header name'
+  uri: /foo/bar
+  method: POST
+  version: HTTP/1.1
+  headers:
+    - name: "   \t\t  "
+      value: chunked
+      tier: Bad
+    - name: "Content-Length"
+      value: 1000
+      tier: Compliant
+  expected:
+    tier: Ambiguous
+    reason: EmptyHeader
+
+- name: 'Transfer-Encoding for HTTP/1.0'
+  uri: /foo/bar
+  method: POST
+  version: HTTP/1.0
+  headers:
+    - name: Transfer-Encoding
+      value: chunked
+      tier: NonCompliant
+  expected:
+    tier: Ambiguous
+    reason: UndefinedTransferEncodingSemantics
+    required_message_items:
+      - "HTTP/1.0"
+
+- name: 'Transfer-Encoding for HTTP/0.9'
+  uri: /foo/bar
+  method: POST
+  version: HTTP/0.9
+  headers:
+    - name: Transfer-Encoding
+      value: chunked
+      tier: NonCompliant
+  expected:
+    tier: Ambiguous
+    reason: UndefinedTransferEncodingSemantics
+    required_message_items:
+      - "HTTP/0.9"
+
+- name: "Transfer-Encoding for empty protocol, which is HTTP/0.9"
+  uri: /foo/bar
+  method: POST
+  version: ""
+  headers:
+    - name: Transfer-Encoding
+      value: chunked
+      tier: NonCompliant
+  expected:
+    tier: Ambiguous
+    reason: UndefinedTransferEncodingSemantics
+    required_message_items:
+      - "HTTP/0.9"
+
+- name: "Transfer-Encoding Latin Small Letter Long S"
+  uri: /foo/bar
+  method: POST
+  version: "HTTP/1.1"
+  headers:
+    - name: "Tranſfer-Encoding"
+      value: chunked
+      tier: NonCompliant
+  expected:
+    tier: Ambiguous
+    reason: SuspiciousHeader
+    required_message_items:
+      - "Transfer-Encoding"
+
+- name: 'Transfer-Encoding Latin Small Letter Dotless I'
+  uri: /foo/bar
+  method: POST
+  version: "HTTP/1.1"
+  headers:
+    - name: "Transfer-Encodıng"
+      value: chunked
+      tier: NonCompliant
+  expected:
+    tier: Ambiguous
+    reason: SuspiciousHeader
+    required_message_items:
+      - "Transfer-Encoding"
+
+- name: 'Transfer-Encoding with multiple hyphens'
+  uri: /foo/bar
+  method: POST
+  version: "HTTP/1.1"
+  headers:
+    - name: "Transfer---Encoding"
+      value: chunked
+      tier: NonCompliant
+  expected:
+    tier: Ambiguous
+    reason: SuspiciousHeader
+    required_message_items:
+      - "Transfer-Encoding"
+
+- name: 'Transfer-Encoding with multiple delimiters'
+  uri: /foo/bar
+  method: POST
+  version: "HTTP/1.1"
+  headers:
+    - name: "Transfer___Encoding"
+      value: chunked
+      tier: NonCompliant
+  expected:
+    tier: Ambiguous
+    reason: SuspiciousHeader
+    required_message_items:
+      - "Transfer-Encoding"
+
+- name: 'Transfer-Encoding with UTF8 spaces'
+  uri: /foo/bar
+  method: POST
+  version: "HTTP/1.1"
+  headers:
+    # a UTF8 space in front of the header name
+    - name: "   Transfer-Encoding"
+      value: chunked
+      tier: NonCompliant
+  expected:
+    tier: Ambiguous
+    reason: SuspiciousHeader
+    required_message_items:
+      - "Transfer-Encoding"
+
+- name: 'Content-Length with UTF8 spaces'
+  uri: /foo/bar
+  method: POST
+  version: "HTTP/1.1"
+  headers:
+    # a UTF8 space after the header name
+    - name: "Content-Length   "
+      value: 1000
+      tier: NonCompliant
+  expected:
+    tier: Ambiguous
+    reason: SuspiciousHeader
+    required_message_items:
+      - "Content-Length"
+
+- name: 'Transfer-Encoding with a UTF8 delimiter'
+  uri: /foo/bar
+  method: POST
+  version: "HTTP/1.1"
+  headers:
+    # a UTF8 delimiter in the header name
+    - name: "Transfer―Encoding"
+      value: chunked
+      tier: NonCompliant
+  expected:
+    tier: Ambiguous
+    reason: SuspiciousHeader
+    required_message_items:
+      - "Transfer-Encoding"
+
+- name: 'Transfer-Encoding with arbitrary non-ASCII chars'
+  uri: /foo/bar
+  method: POST
+  version: "HTTP/1.1"
+  headers:
+    - name: "Transfer-Encoding\x88"
+      value: chunked
+      tier: NonCompliant
+  expected:
+    tier: Ambiguous
+    reason: SuspiciousHeader
+    required_message_items:
+      - "Transfer-Encoding"
+
+- name: 'Content-Length with arbitrary non-ASCII chars'
+  uri: /foo/bar
+  method: POST
+  version: "HTTP/1.1"
+  headers:
+    - name: "\xa0Content-Length"
+      value: 100
+      tier: NonCompliant
+  expected:
+    tier: Ambiguous
+    reason: SuspiciousHeader
+    required_message_items:
+      - "Content-Length"
+

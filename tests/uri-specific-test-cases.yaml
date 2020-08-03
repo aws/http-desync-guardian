@@ -1,0 +1,193 @@
+#
+# This test suite contains cases when URI contains bad characters.
+#
+
+- name: '\t in URI'
+  uri: "/endpoint_a\tHTTP/1.1"
+  method: GET
+  version: HTTP/1.1
+  headers:
+    - name: "X-Forwarded-For"
+      value: "1.1.1.1"
+      tier: "Compliant"
+  expected:
+    tier: Ambiguous
+    reason: AmbiguousUri
+    required_message_items:
+      - "URI"
+
+- name: 'Extra spaces in version'
+  uri: "/endpoint_a"
+  method: GET
+  version: "HTTP/1.1 "
+  headers:
+    - name: "X-Forwarded-For"
+      value: "1.1.1.1"
+      tier: "Compliant"
+  expected:
+    tier: Acceptable
+    reason: NonCompliantVersion
+    required_message_items:
+      - "version"
+
+- name: '\x01 in URI'
+  uri: "/endpoint_a\x01HTTP/1.1"
+  method: GET
+  version: HTTP/1.1
+  headers:
+    - name: "X-Forwarded-For"
+      value: "1.1.1.1"
+      tier: "Compliant"
+  expected:
+    tier: Ambiguous
+    reason: AmbiguousUri
+    required_message_items:
+      - "URI"
+
+- name: '[space] in URI'
+  uri: "/endpoint_a?param=not escaped spaces"
+  method: GET
+  version: HTTP/1.1
+  headers:
+    - name: "X-Forwarded-For"
+      value: "1.1.1.1"
+      tier: "Compliant"
+  expected:
+    tier: Acceptable
+    reason: SpaceInUri
+    required_message_items:
+      - "URI"
+
+- name: '[space] in URI resulted in a bad version'
+  uri: "/endpoint_a"
+  method: GET
+  version: "HTTP/1.1 HTTP/1.1"
+  headers:
+    - name: "X-Forwarded-For"
+      value: "1.1.1.1"
+      tier: "Compliant"
+  expected:
+    tier: Severe
+    reason: BadVersion
+    required_message_items:
+      - "Version"
+
+- name: '\r in URI'
+  uri: "/endpoint_a\rHTTP/1.1"
+  method: GET
+  version: HTTP/1.1
+  headers:
+    - name: "X-Forwarded-For"
+      value: "1.1.1.1"
+      tier: "Compliant"
+  expected:
+    tier: Severe
+    reason: BadUri
+    required_message_items:
+      - "URI"
+
+- name: '\n in URI'
+  uri: "/endpoint_a\nHTTP/1.1"
+  method: GET
+  version: HTTP/1.1
+  headers:
+    - name: "X-Forwarded-For"
+      value: "1.1.1.1"
+      tier: "Compliant"
+  expected:
+    tier: Severe
+    reason: BadUri
+    required_message_items:
+      - "URI"
+
+- name: 'Request Smuggling in URI'
+  uri: "/endpoint_a\tHTTP/1.1\r\nHost:localhost\r\n\r\nGET\t/endpoint_b\t"
+  method: GET
+  version: HTTP/1.1
+  headers:
+    - name: "X-Forwarded-For"
+      value: "1.1.1.1"
+      tier: "Compliant"
+  expected:
+    tier: Severe
+    reason: BadUri
+    required_message_items:
+      - "URI"
+
+- name: '\0 in URI'
+  uri: "/endpoint_a\x00HTTP/1.1"
+  method: GET
+  version: HTTP/1.1
+  headers:
+    - name: "X-Forwarded-For"
+      value: "1.1.1.1"
+      tier: "Compliant"
+  expected:
+    tier: Severe
+    reason: BadUri
+    required_message_items:
+      - "URI"
+
+- name: '\0 at the start of URI'
+  uri: "\x00/endpoint_aHTTP/1.1"
+  method: GET
+  version: HTTP/1.1
+  headers:
+    - name: "X-Forwarded-For"
+      value: "1.1.1.1"
+      tier: "Compliant"
+  expected:
+    tier: Severe
+    reason: BadUri
+    required_message_items:
+      - "URI"
+
+# Escaping of CTL in URLs shouldn't be restricted
+- name: '%09 in URI is OK'
+  uri: "/path-%09-uri"
+  method: GET
+  version: HTTP/1.1
+  headers:
+    - name: "X-Forwarded-For"
+      value: "1.1.1.1"
+      tier: "Compliant"
+  expected:
+    tier: Compliant
+    reason: Compliant
+
+- name: '%20 in URI is OK'
+  uri: "/path-%20-uri"
+  method: GET
+  version: HTTP/1.1
+  headers:
+    - name: "X-Forwarded-For"
+      value: "1.1.1.1"
+      tier: "Compliant"
+  expected:
+    tier: Compliant
+    reason: Compliant
+
+- name: '%0D in URI is OK'
+  uri: "/path-%0D-uri"
+  method: GET
+  version: HTTP/1.1
+  headers:
+    - name: "X-Forwarded-For"
+      value: "1.1.1.1"
+      tier: "Compliant"
+  expected:
+    tier: Compliant
+    reason: Compliant
+
+- name: '%0A in URI is OK'
+  uri: "/path-%0A-uri"
+  method: GET
+  version: HTTP/1.1
+  headers:
+    - name: "X-Forwarded-For"
+      value: "1.1.1.1"
+      tier: "Compliant"
+  expected:
+    tier: Compliant
+    reason: Compliant
+

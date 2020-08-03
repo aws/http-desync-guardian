@@ -1,0 +1,19 @@
+# A file with a single test-case for adding new or debugging existing test-cases
+# It runs first in the test suite.
+
+- name: 'Both Transfer-Encoding:chunked and Content-Length'
+  uri: /foo/bar
+  method: POST
+  version: HTTP/1.1
+  headers:
+    - name: Transfer-Encoding
+      value: chunked
+      tier: Compliant
+    - name: Content-Length
+      value: 100
+      tier: Bad
+  expected:
+    tier: Ambiguous
+    reason: BothTeClPresent
+    required_message_items:
+      - "Content-Length"

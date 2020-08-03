@@ -1,0 +1,40 @@
+[package]
+name = "http_desync_guardian"
+version = "0.0.0"
+authors = ["Eugene Retunsky <retunsky@gmail.com>"]
+edition = "2018"
+publish = true
+license = "Apache 2.0"
+description = "HTTP/1.1 request analysis to prevent HTTP Desync attacks"
+repository = "https://github.com/aws/http-desync-guardian"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[lib]
+name = "http_desync_guardian"
+crate-type = ["staticlib", "cdylib", "lib"]
+
+[dependencies]
+lazy_static = "1.4"
+smallvec = "1.2"
+strum = "0.18.0"
+strum_macros = "0.18.0"
+
+[build-dependencies]
+cbindgen = "0.13"
+
+[dev-dependencies]
+snailquote = "0.3"
+yaml-rust = "0.4"
+criterion = "0.3"
+
+[[bench]]
+name = "benchmarks"
+harness = false
+
+[profile.dev]
+opt-level = 0
+
+[profile.release]
+opt-level = 3
+

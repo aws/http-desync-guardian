@@ -1,0 +1,190 @@
+#
+# These test-cases to ensure that the engine is not excessively prohibitive.
+# And that RFC compliant requests are being classified as such.
+#
+
+- name: No headers
+  uri: /foo/bar
+  method: GET
+  version: HTTP/1.1
+  headers:
+  expected:
+    tier: Compliant
+    reason: Compliant
+
+- name: Valid Transfer-Encoding (chunked)
+  uri: /foo/bar
+  method: POST
+  version: HTTP/1.1
+  headers:
+    - name: Transfer-Encoding
+      value: chunked
+      tier: Compliant
+  expected:
+    tier: Compliant
+    reason: Compliant
+
+- name: Valid Content-Length
+  uri: /foo/bar
+  method: PUT
+  version: HTTP/1.1
+  headers:
+    - name: Content-Length
+      value: 1000
+      tier: Compliant
+  expected:
+    tier: Compliant
+    reason: Compliant
+
+- name: Valid Transfer-Encoding (chunked) + custom header (non-ascii)
+  uri: /foo/bar
+  method: POST
+  version: HTTP/1.1
+  headers:
+    - name: "Transfer-Encoding"
+      value: "chunked"
+      tier: Compliant
+    - name: "My-Custom-Header"
+      value: "\t\t\tCustom-Value;\x60\x85\x93\xA0"
+      tier: Compliant
+  expected:
+    tier: Compliant
+    reason: Compliant
+
+- name: Valid custom header with tchar in name and obs-text
+  uri: /foo/bar
+  method: POST
+  version: HTTP/1.1
+  headers:
+    - name: "My-Custom-Header.!#$%&'*+^_`|~0123456789"
+      value: "\t\t\tCustom-Value;\x60\x85\x93\xA0"
+      tier: Compliant
+  expected:
+    tier: Compliant
+    reason: Compliant
+
+- name: Valid custom header with underscore in name
+  uri: /foo/bar
+  method: POST
+  version: HTTP/1.1
+  headers:
+    - name: "My_Custom_Header"
+      value: "\t\t\tCustom-Value;\x60\x85\x93\xA0"
+      tier: Compliant
+  expected:
+    tier: Compliant
+    reason: Compliant
+
+- name: Valid custom header with dot in name
+  uri: /foo/bar
+  method: POST
+  version: HTTP/1.1
+  headers:
+    - name: "My.Custom.Header"
+      value: "\t\t\tCustom-Value;\x60\x85\x93\xA0"
+      tier: Compliant
+  expected:
+    tier: Compliant
+    reason: Compliant
+
+- name: Valid custom header with digits in name
+  uri: /foo/bar
+  method: POST
+  version: HTTP/1.1
+  headers:
+    - name: "My-Custom-Header-0987654321"
+      value: "\t\t\tCustom-Value;\x60\x85\x93\xA0"
+      tier: Compliant
+  expected:
+    tier: Compliant
+    reason: Compliant
+
+- name: Different Transfer-Encoding headers
+  uri: /foo/bar
+  method: POST
+  version: HTTP/1.1
+  headers:
+    - name: Transfer-Encoding
+      value: gzip
+      tier: Compliant
+    - name: Transfer-Encoding
+      value: deflate
+      tier: Compliant
+    - name: Transfer-Encoding
+      value: identity
+      tier: Compliant
+    - name: Transfer-Encoding
+      value: compress
+      tier: Compliant
+    - name: Transfer-Encoding
+      value: chunked
+      tier: Compliant
+  expected:
+    tier: Compliant
+    reason: Compliant
+
+- name: Different Transfer-Encoding headers combined
+  uri: /foo/bar
+  method: POST
+  version: HTTP/1.1
+  headers:
+    - name: Transfer-Encoding
+      value: "gzip , deflate , \tidentity\t, compress\t, chunked"
+      tier: Compliant
+  expected:
+    tier: Compliant
+    reason: Compliant
+
+- name: 'Transfer-Encoding with a param: chunked;custom_param'
+  uri: /foo/bar
+  method: POST
+  version: HTTP/1.1
+  headers:
+    - name: Transfer-Encoding
+      value: "   gzip   ;   "
+      tier: Compliant
+    - name: Transfer-Encoding
+      value: "deflate\t\t;\t\t"
+      tier: Compliant
+    - name: Transfer-Encoding
+      value: "\t\t\t\tchunked;custom_param;\t\t\t\t"
+      tier: Compliant
+  expected:
+    tier: Compliant
+    reason: Compliant
+
+- name: 'Compliant URL'
+  uri: "/user:pass123@www.example.com:8080/site/index.php?action=login%20++~!@#$%^&*()_+:<>?,./;'[]{}`~\\\"|&prev=index#form"
+  method: POST
+  version: HTTP/1.1
+  headers:
+    - name: Accept
+      value: "*/*"
+      tier: Compliant
+  expected:
+    tier: Compliant
+    reason: Compliant
+
+- name: 'International in URI'
+  uri: "/странные-символы/поддерживаются"
+  method: GET
+  version: HTTP/1.1
+  headers:
+    - name: "X-Forwarded-For"
+      value: "1.1.1.1"
+      tier: "Compliant"
+  expected:
+    tier: Compliant
+    reason: Compliant
+
+- name: 'Empty URI'
+  uri: ""
+  method: GET
+  version: HTTP/1.1
+  headers:
+    - name: "X-Forwarded-For"
+      value: "1.1.1.1"
+      tier: "Compliant"
+  expected:
+    tier: Compliant
+    reason: Compliant
