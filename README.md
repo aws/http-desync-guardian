@@ -43,11 +43,11 @@ Learn more: [generic](./misc/demo-c) and [Nginx](./misc/demo-nginx) examples.
 #include "http_desync_guardian.h"
 
 /* 
- * http_engine_request_t - already parsed by an HTTP engine 
+ * http_engine_request_t - already parsed by the HTTP engine 
  */
 static int check_request(http_engine_request_t *req) {
-    http_desync_guardian_request guardian_request = construct_http_desync_guardian_from(req); 
-    http_desync_guardian_verdict verdict = {0};
+    http_desync_guardian_request_t guardian_request = construct_http_desync_guardian_from(req); 
+    http_desync_guardian_verdict_t verdict = {0};
 
     http_desync_guardian_analyze_request(&guardian_request, &verdict);
 
@@ -80,12 +80,13 @@ Usage from Rust
 See [benchmarks](./benches/benchmarks.rs) as an example of usage from Rust. 
 
 ## Security issue notifications
+
 If you discover a potential security issue in `http_desync_gardian` we ask that you notify
 AWS Security via our [vulnerability reporting page](http://aws.amazon.com/security/vulnerability-reporting/). Please do **not** create a public github issue. 
 
 ## Security
 
-See [CONTRIBUTING](CONTRIBUTING.md) for more information.
+See [CONTRIBUTING](./CONTRIBUTING.md) for more information.
 
 ## License
 
