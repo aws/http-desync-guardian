@@ -7,6 +7,7 @@ publish = true
 license = "Apache 2.0"
 description = "HTTP/1.1 request analysis to prevent HTTP Desync attacks"
 repository = "https://github.com/aws/http-desync-guardian"
+build = "build.rs"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 

@@ -12,15 +12,9 @@
 /// express or implied. See the License for the specific language governing
 /// permissions and limitations under the License.
 ///
-use crate::http_token_utils::char_tables::{
-    BAD_CHARACTERS, HEADER_VALUE_CHARS, RFC_WHITE_SPACE, TCHAR_TABLE, VALID_URI_CHARS, VCHAR,
-};
 use crate::http_token_utils::TokenSimilarity::{Distant, Identical, SameLetters};
 use crate::MESSAGE_MAX_SIZE;
 use std::fmt::Write;
-
-#[path = "char_tables.rs"]
-mod char_tables;
 
 /// No allocation of new tokens is happening.
 /// All operations are in-place and read only.
@@ -30,6 +24,8 @@ pub const fn http_token(v: &str) -> HttpToken {
     v.as_bytes()
 }
 
+// Include generated char tables. See `build.rs`
+include!(concat!(env!("OUT_DIR"), "/char_tables.rs"));
 pub const TE: HttpToken = http_token("transfer-encoding");
 pub const CL: HttpToken = http_token("content-length");
 ///

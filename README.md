@@ -1,3 +1,7 @@
+![](docs/http-desync-guardian-logo.png)
+
+[![Apache 2 License](https://img.shields.io/github/license/awslabs/s2n.svg)](http://aws.amazon.com/apache-2-0/)
+
 Overview
 ========
 
@@ -5,6 +9,8 @@ Overview
 It can be used to either for raw HTTP request headers or already parsed by an HTTP engine.
 Consumers may configure logging and metrics collection.
 Logging is rate limited and all user data is obfuscated. 
+
+If you think you might have found a security impacting issue, please follow [our Security Notification Process.](#security-issue-notifications)
 
 Priorities
 =======
@@ -18,8 +24,8 @@ Supported HTTP versions
 ======
 
 * `HTTP/0.9` - all traffic is classified as `Acceptable`.
-* `HTTP/1.0` - presence of `Transfer-Encoding` is considered `Ambiguous`.
-* `HTTP/1.1` - the main focus of this library
+* `HTTP/1.0` - the presence of `Transfer-Encoding` makes a request `Ambiguous`.
+* `HTTP/1.1` - the main focus of this library (see [tests](./tests)).
 * `HTTP/2`+ - out of scope. But if your proxy downgrades `HTTP/2` to `HTTP/1.1`, make sure the outgoing request is analyzed. 
 
 See [documentation](./docs) to learn more.
@@ -29,7 +35,7 @@ Usage from C
 
 This library is designed to be primarily used from HTTP engines written in `C/C++`.  
 
-Run `cargo build` and see generated `include/http_desync_guardian.h`.
+Run `cargo build --release` and see generated `target/release/build/http_desync_guardian-*/out/http_desync_guardian.h`.
 
 Learn more: [generic](./misc/demo-c) and [Nginx](./misc/demo-nginx) examples.
 
@@ -72,6 +78,10 @@ Usage from Rust
 ====
 
 See [benchmarks](./benches/benchmarks.rs) as an example of usage from Rust. 
+
+## Security issue notifications
+If you discover a potential security issue in `http_desync_gardian` we ask that you notify
+AWS Security via our [vulnerability reporting page](http://aws.amazon.com/security/vulnerability-reporting/). Please do **not** create a public github issue. 
 
 ## Security
 

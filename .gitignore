@@ -1,7 +1,5 @@
 Cargo.lock
-include/http_desync_guardian.h
 build/
 target/
-src/char_tables.rs
 .cargo/
 .idea/

@@ -89,6 +89,8 @@ fn is_bad_http_character(b: u8) -> bool {
 type TableGenerator = fn(u8) -> bool;
 
 fn generate_lookup_tables() {
+    use std::fmt::Write;
+
     let tables: &[(&str, TableGenerator)] = &[
         ("TCHAR_TABLE", |b| is_rfc_tchar(b)),
         ("VCHAR", |b| is_rfc_vchar(b)),
@@ -100,38 +102,24 @@ fn generate_lookup_tables() {
         }),
     ];
 
-    let mut file = File::create("src/char_tables.rs").expect("Cannot open file for writing");
-    let copyright = "///\n\
-            /// Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.\n\
-            ///\n\
-            /// Licensed under the Apache License, Version 2.0 (the \"License\").\n\
-            /// You may not use this file except in compliance with the License.\n\
-            /// A copy of the License is located at\n\
-            ///\n\
-            ///  http://aws.amazon.com/apache2.0\n\
-            ///\n\
-            /// or in the \"license\" file accompanying this file. This file is distributed\n\
-            /// on an \"AS IS\" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either\n\
-            /// express or implied. See the License for the specific language governing\n\
-            /// permissions and limitations under the License.\n\
-            ///\n\
-            \n\
-            /// This source file is auto-generated, do not modify it manually.\n\
-             
-            ";
-    file.write_all(copyright.as_bytes())
-        .expect("Cannot write to file");
+    let mut char_tables = String::new();
     for table in tables {
-        file.write_all(generate_table(table.0, table.1).as_bytes())
-            .expect("Cannot write to file");
+        write!(char_tables, "{}", generate_table(table.0, table.1))
+            .expect("Writing to strings is infallible");
     }
+    let out_dir = env::var("OUT_DIR").expect("OUT_DIR variable is not set");
+    let mut file =
+        File::create(format!("{}/char_tables.rs", out_dir)).expect("Cannot open file for writing");
+    file.write_all(char_tables.as_bytes())
+        .expect("Cannot write to file");
 }
 
 fn main() {
     generate_lookup_tables();
 
-    let crate_dir = env::var("CARGO_MANIFEST_DIR").unwrap();
+    let crate_dir = env::var("CARGO_MANIFEST_DIR").expect("CARGO_MANIFEST_DIR variable is not set");
+    let out_dir = env::var("OUT_DIR").expect("OUT_DIR variable is not set");
     cbindgen::generate(&crate_dir)
         .unwrap()
-        .write_to_file("./include/http_desync_guardian.h");
+        .write_to_file(format!("{}/http_desync_guardian.h", out_dir));
 }
