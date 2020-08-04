@@ -1,0 +1,453 @@
+#
+# Contains dangerous test-cases.
+# Such requests MUST be treated as irrecoverable error (400 + closing FE connection).
+#
+
+# If a message is received that has multiple Content-Length header
+# fields with field-values consisting of the same decimal value, or a
+# single Content-Length header field with a field value containing a
+# list of identical decimal values (e.g., "Content-Length: 42, 42"),
+# indicating that duplicate Content-Length header fields have been
+# generated or combined by an upstream message processor, then the
+# recipient MUST either reject the message as invalid or replace the
+# duplicated field-values with a single valid Content-Length field
+# containing that decimal value prior to determining the message body
+# length or forwarding the message.
+- name: Multiple Content-Length
+  uri: /foo/bar
+  method: POST
+  version: HTTP/1.1
+  headers:
+    - name: Content-Length
+      value: 1000
+      tier: Bad
+    - name: Content-Length
+      value: 100
+      tier: Bad
+  expected:
+    tier: Severe
+    reason: MultipleContentLength
+    required_message_items:
+      - "Multiple"
+      - "Content-Length"
+
+- name: 'Bad Content-Length: 1000,1000'
+  uri: /foo/bar
+  method: POST
+  version: HTTP/1.1
+  headers:
+    - name: Content-Length
+      value: 1000,1000
+      tier: Bad
+  expected:
+    tier: Severe
+    reason: BadContentLength
+    required_message_items:
+      - "Content-Length"
+
+- name: 'Bad Content-Length: 1000 1000'
+  uri: /foo/bar
+  method: POST
+  version: HTTP/1.1
+  headers:
+    - name: Content-Length
+      value: 1000 1000
+      tier: Bad
+  expected:
+    tier: Severe
+    reason: BadContentLength
+    required_message_items:
+      - "Content-Length"
+
+- name: 'Bad Content-Length: 1000.1000'
+  uri: /foo/bar
+  method: POST
+  version: HTTP/1.1
+  headers:
+    - name: Content-Length
+      value: "1000.1000"
+      tier: Bad
+  expected:
+    tier: Severe
+    reason: BadContentLength
+    required_message_items:
+      - "Content-Length"
+
+- name: Bad Content-Length (64-bits overflow)
+  uri: /foo/bar
+  method: POST
+  version: HTTP/1.1
+  headers:
+    - name: Content-Length
+      value: "18446744073709551616"
+      tier: Bad
+  expected:
+    tier: Severe
+    reason: BadContentLength
+    required_message_items:
+      - "Content-Length"
+
+- name: 'Unknown Transfer-Encoding: xchunked'
+  uri: /foo/bar
+  method: POST
+  version: HTTP/1.1
+  headers:
+    - name: Transfer-Encoding
+      value: xchunked
+      tier: Bad
+  expected:
+    tier: Severe
+    reason: BadTransferEncoding
+    required_message_items:
+      - "Transfer-Encoding"
+      - "xchunked"
+
+- name: 'Bad character in Transfer-Encoding value: chunked\x11'
+  uri: /foo/bar
+  method: POST
+  version: HTTP/1.1
+  headers:
+    - name: Transfer-Encoding
+      value: "chunked\x11"
+      tier: Bad
+  expected:
+    tier: Severe
+    reason: BadTransferEncoding
+    required_message_items:
+      - "Transfer-Encoding"
+      - "chunked\\\\0x11"
+
+- name: 'Bad character in Content-Length value: 1000\x11'
+  uri: /foo/bar
+  method: POST
+  version: HTTP/1.1
+  headers:
+    - name: Content-Length
+      value: "1000\x11"
+      tier: Bad
+  expected:
+    tier: Severe
+    reason: BadContentLength
+    required_message_items:
+      - "Content-Length"
+      - "1000\\\\0x11"
+
+# A sender MUST NOT apply chunked more than once to a message body
+# https://tools.ietf.org/html/rfc7230#section-3.3.1
+- name: 'Multiple Transfer-Encoding: chunked'
+  uri: /foo/bar
+  method: POST
+  version: HTTP/1.1
+  headers:
+    - name: Transfer-Encoding
+      value: chunked
+      tier: Bad
+    - name: Transfer-Encoding
+      value: chunked
+      tier: Bad
+  expected:
+    tier: Severe
+    reason: MultipleTransferEncodingChunked
+    required_message_items:
+      - "Transfer-Encoding"
+
+- name: 'Multiple Transfer-Encoding: chunked,chunked'
+  uri: /foo/bar
+  method: POST
+  version: HTTP/1.1
+  headers:
+    - name: Transfer-Encoding
+      value: chunked,chunked
+      tier: Bad
+  expected:
+    tier: Severe
+    reason: MultipleTransferEncodingChunked
+    required_message_items:
+      - "Transfer-Encoding"
+
+# Historically, HTTP header field values could be extended over multiple lines by
+# preceding each extra line with at least one space or horizontal tab (obs-fold).
+# This specification deprecates such line folding except within the message/http media
+# type (Section 8.3.1). A sender MUST NOT generate a message that includes line folding
+# (i.e., that has any field-value that contains a match to the obs-fold rule) unless the message
+# is intended for packaging within the message/http media type.
+# https://tools.ietf.org/html/rfc7230#section-3.2.4
+- name: Multiline headers are deprecated
+  uri: /foo/bar
+  method: POST
+  version: HTTP/1.1
+  headers:
+    - name: Content-Length
+      value: 1000
+      tier: Compliant
+    - name: "Some-Custom-Header"
+      value: "Multi-line values\r\n are \n deprecated. E.g. it may contain \n Transfer-Encoding: chunked\r\n"
+      tier: Bad
+  expected:
+    tier: Severe
+    reason: BadHeader
+    required_message_items:
+      - "Some-Custom-Header"
+
+- name: 'Multiline headers are deprecated (with \n only)'
+  uri: /foo/bar
+  method: POST
+  version: HTTP/1.1
+  headers:
+    - name: Content-Length
+      value: 1000
+      tier: Compliant
+    - name: "Some-Custom-Header"
+      value: "Multi-line values\n are \n deprecated. E.g. it may contain \n Transfer-Encoding: chunked"
+      tier: Bad
+  expected:
+    tier: Severe
+    reason: BadHeader
+    required_message_items:
+      - "Some-Custom-Header"
+
+- name: "Http Engine missed CR"
+  uri: /foo/bar
+  method: POST
+  version: HTTP/1.1
+  headers:
+    - name: Content-Length
+      value: 1000
+      tier: Compliant
+    - name: "Some-Custom-Header"
+      value: "Parser error\r must not contain\r symbols."
+      tier: Bad
+  expected:
+    tier: Severe
+    reason: BadHeader
+    required_message_items:
+      - "Some-Custom-Header"
+
+- name: "Http Engine missed LF"
+  uri: /foo/bar
+  method: POST
+  version: HTTP/1.1
+  headers:
+    - name: Content-Length
+      value: 1000
+      tier: Compliant
+    - name: "Some-Custom-Header"
+      value: "Parser error\n must not contain\n symbols."
+      tier: Bad
+  expected:
+    tier: Severe
+    reason: BadHeader
+    required_message_items:
+      - "Some-Custom-Header"
+
+- name: '\r in name is bad'
+  uri: /foo/bar
+  method: POST
+  version: HTTP/1.1
+  headers:
+    - name: "Some-Bad-Header\r"
+      value: 1000
+      tier: Bad
+  expected:
+    tier: Severe
+    reason: BadHeader
+    required_message_items:
+      - "Some-Bad-Header"
+
+- name: '\n in name is bad'
+  uri: /foo/bar
+  method: POST
+  version: HTTP/1.1
+  headers:
+    - name: "Some-Bad-Header\n"
+      value: "Content-Length:1000\r\n Transfer-Encoding: chunked"
+      tier: Bad
+    - name: "Content-Length"
+      value: "100"
+      tier: Compliant
+  expected:
+    tier: Severe
+    reason: BadHeader
+    required_message_items:
+      - "Some-Bad-Header\\\\n"
+      - "_"
+
+- name: '\0 in name is bad'
+  uri: /foo/bar
+  method: POST
+  version: HTTP/1.1
+  headers:
+    - name: "Some-Bad-Header\x00"
+      value: 1000
+      tier: Bad
+  expected:
+    tier: Severe
+    reason: BadHeader
+    required_message_items:
+      - "Some-Bad-Header\\\\0x00"
+      - "_"
+
+- name: '\r in value is bad'
+  uri: /foo/bar
+  method: POST
+  version: HTTP/1.1
+  headers:
+    - name: "Some-Bad-Header"
+      value: "value\rcontent-length: 1000"
+      tier: Bad
+    - name: "Content-Length"
+      value: "100"
+      tier: Compliant
+  expected:
+    tier: Severe
+    reason: BadHeader
+    required_message_items:
+      - "Some-Bad-Header"
+
+- name: '\n in value is bad'
+  uri: /foo/bar
+  method: POST
+  version: HTTP/1.1
+  headers:
+    - name: "Some-Bad-Header"
+      value: "value\n content-length: 1000"
+      tier: Bad
+    - name: "Content-Length"
+      value: "100"
+      tier: Compliant
+  expected:
+    tier: Severe
+    reason: BadHeader
+    required_message_items:
+      - "Some-Bad-Header"
+
+- name: '\0 in value is bad'
+  uri: /foo/bar
+  method: POST
+  version: HTTP/1.1
+  headers:
+    - name: "Some-Bad-Header"
+      value: "value\x00content-length: 1000"
+      tier: Bad
+    - name: "Content-Length"
+      value: "100"
+      tier: Compliant
+  expected:
+    tier: Severe
+    reason: BadHeader
+    required_message_items:
+      - "Some-Bad-Header"
+
+- name: '\0 at the start of a line'
+  uri: /foo/bar
+  method: POST
+  version: HTTP/1.1
+  headers:
+    - name: "\x00Some-Bad-Header"
+      value: "value"
+      tier: Bad
+    - name: "Content-Length"
+      value: "100"
+      tier: Compliant
+  expected:
+    tier: Severe
+    reason: BadHeader
+    required_message_items:
+      - "Some-Bad-Header"
+
+- name: '\0 at the start of a value'
+  uri: /foo/bar
+  method: POST
+  version: HTTP/1.1
+  headers:
+    - name: "Some-Bad-Header"
+      value: "\x00value"
+      tier: Bad
+    - name: "Content-Length"
+      value: "100"
+      tier: Compliant
+  expected:
+    tier: Severe
+    reason: BadHeader
+    required_message_items:
+      - "Some-Bad-Header"
+
+- name: '\0 at the end of a value'
+  uri: /foo/bar
+  method: POST
+  version: HTTP/1.1
+  headers:
+    - name: "Some-Bad-Header"
+      value: "value\x00"
+      tier: Bad
+    - name: "Content-Length"
+      value: "100"
+      tier: Compliant
+  expected:
+    tier: Severe
+    reason: BadHeader
+    required_message_items:
+      - "Some-Bad-Header"
+
+- name: Content-Length[white-space] and Content-Length
+  uri: /foo/bar
+  method: POST
+  version: HTTP/1.1
+  headers:
+    - name: "Content-Length "
+      value: 100
+      tier: Bad
+    - name: "Content-Length"
+      value: 1000
+      tier: Bad
+  expected:
+    tier: Severe
+    reason: MultipleContentLength
+    required_message_items:
+      - "Content-Length"
+
+- name: '[white-space]Content-Length and Content-Length'
+  uri: /foo/bar
+  method: POST
+  version: HTTP/1.1
+  headers:
+    - name: " Content-Length"
+      value: 100
+      tier: Bad
+    - name: "Content-Length"
+      value: 1000
+      tier: Bad
+  expected:
+    tier: Severe
+    reason: MultipleContentLength
+    required_message_items:
+      - "Content-Length"
+
+- name: Transfer-Encoding[white-space] and Transfer-Encoding
+  uri: /foo/bar
+  method: POST
+  version: HTTP/1.1
+  headers:
+    - name: "Transfer-Encoding "
+      value: chunked
+      tier: Bad
+    - name: "Transfer-Encoding"
+      value: chunked
+      tier: Bad
+  expected:
+    tier: Severe
+    reason: MultipleTransferEncodingChunked
+    required_message_items:
+      - "Transfer-Encoding"
+
+- name: Bad method
+  uri: /foo/bar
+  method: "bad_method\x01"
+  version: HTTP/1.1
+  headers:
+    - name: "Host"
+      value: localhost
+      tier: Compliant
+  expected:
+    tier: Severe
+    reason: BadMethod

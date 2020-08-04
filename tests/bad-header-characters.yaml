@@ -1,0 +1,237 @@
+#
+# This test suite contains cases when header name or value contains bad characters.
+#
+
+- name: '\x01Transfer-Encoding'
+  uri: /foo/bar
+  method: POST
+  version: HTTP/1.1
+  headers:
+    - name: "Some-Custom-Header"
+      value: "Non-Rfc Compliant"
+      tier: Compliant
+    - name: "\x01Transfer-Encoding"
+      value: "chunked"
+      tier: NonCompliant
+  expected:
+    tier: Ambiguous
+    reason: SuspiciousHeader
+    required_message_items:
+      - "Transfer-Encoding"
+
+- name: 'Transfer-Encoding: \x01chunked'
+  uri: /foo/bar
+  method: POST
+  version: HTTP/1.1
+  headers:
+    - name: "Transfer-Encoding"
+      value: "\x01chunked"
+      tier: Bad
+  expected:
+    tier: Severe
+    reason: BadTransferEncoding
+    required_message_items:
+      - "Transfer-Encoding"
+
+- name: 'Transfer-Encoding: chunked\x01'
+  uri: /foo/bar
+  method: POST
+  version: HTTP/1.1
+  headers:
+    - name: "Transfer-Encoding"
+      value: "chunked\x01"
+      tier: Bad
+  expected:
+    tier: Severe
+    reason: BadTransferEncoding
+    required_message_items:
+      - "Transfer-Encoding"
+
+- name: 'Transfer-Encoding: \xa0chunked'
+  uri: /foo/bar
+  method: POST
+  version: HTTP/1.1
+  headers:
+    - name: "Transfer-Encoding"
+      value: "\xa0chunked"
+      tier: Bad
+  expected:
+    tier: Severe
+    reason: BadTransferEncoding
+    required_message_items:
+      - "Transfer-Encoding"
+
+- name: 'Transfer-Encoding: chunked\xa0'
+  uri: /foo/bar
+  method: POST
+  version: HTTP/1.1
+  headers:
+    - name: "Transfer-Encoding"
+      value: "chunked\xa0"
+      tier: Bad
+  expected:
+    tier: Severe
+    reason: BadTransferEncoding
+    required_message_items:
+      - "Transfer-Encoding"
+
+- name: 'Transfer-Encoding\x01'
+  uri: /foo/bar
+  method: POST
+  version: HTTP/1.1
+  headers:
+    - name: "Some-Custom-Header"
+      value: "Non-Rfc Compliant"
+      tier: Compliant
+    - name: "Transfer-Encoding\x01"
+      value: "chunked"
+      tier: NonCompliant
+  expected:
+    tier: Ambiguous
+    reason: SuspiciousHeader
+    required_message_items:
+      - "Transfer-Encoding"
+
+- name: '\x01Content-Length'
+  uri: /foo/bar
+  method: POST
+  version: HTTP/1.1
+  headers:
+    - name: "Some-Custom-Header"
+      value: "Non-Rfc Compliant"
+      tier: Compliant
+    - name: "\x01Content-Length"
+      value: "1000"
+      tier: NonCompliant
+  expected:
+    tier: Ambiguous
+    reason: SuspiciousHeader
+    required_message_items:
+      - "Content-Length"
+
+- name: 'Content-Length\x01'
+  uri: /foo/bar
+  method: POST
+  version: HTTP/1.1
+  headers:
+    - name: "Some-Custom-Header"
+      value: "Non-Rfc Compliant"
+      tier: Compliant
+    - name: "Content-Length\x01"
+      value: "1000"
+      tier: NonCompliant
+  expected:
+    tier: Ambiguous
+    reason: SuspiciousHeader
+    required_message_items:
+      - "Content-Length"
+
+- name: 'Content-Length: \x01 1000'
+  uri: /foo/bar
+  method: POST
+  version: HTTP/1.1
+  headers:
+    - name: "Content-Length"
+      value: "\x011000"
+      tier: Bad
+  expected:
+    tier: Severe
+    reason: BadContentLength
+    required_message_items:
+      - "Content-Length"
+
+- name: 'Content-Length: 1000\x01 '
+  uri: /foo/bar
+  method: POST
+  version: HTTP/1.1
+  headers:
+    - name: "Content-Length"
+      value: "1000\x01"
+      tier: Bad
+  expected:
+    tier: Severe
+    reason: BadContentLength
+    required_message_items:
+      - "Content-Length"
+
+- name: 'Content-Length: 1000\xa0'
+  uri: /foo/bar
+  method: POST
+  version: HTTP/1.1
+  headers:
+    - name: "Content-Length"
+      value: "1000\xa0"
+      tier: Bad
+  expected:
+    tier: Severe
+    reason: BadContentLength
+    required_message_items:
+      - "Content-Length"
+
+- name: 'Some-Header\x01'
+  uri: /foo/bar
+  method: POST
+  version: HTTP/1.1
+  headers:
+    - name: "Some-Custom-Header\x01"
+      value: "Non-Rfc Compliant"
+      tier: NonCompliant
+    - name: "Transfer-Encoding"
+      value: "chunked"
+      tier: Compliant
+  expected:
+    tier: Acceptable
+    reason: NonCompliantHeader
+    required_message_items:
+      - "Some-Custom-Header"
+
+- name: '\x01Some-Header'
+  uri: /foo/bar
+  method: POST
+  version: HTTP/1.1
+  headers:
+    - name: "\x01Some-Custom-Header"
+      value: "Non-Rfc Compliant"
+      tier: NonCompliant
+    - name: "Transfer-Encoding"
+      value: "chunked"
+      tier: Compliant
+  expected:
+    tier: Acceptable
+    reason: NonCompliantHeader
+    required_message_items:
+      - "Some-Custom-Header"
+
+- name: 'Some-Header: \x01value'
+  uri: /foo/bar
+  method: POST
+  version: HTTP/1.1
+  headers:
+    - name: "Some-Custom-Header"
+      value: "\x01Non-Rfc Compliant"
+      tier: NonCompliant
+    - name: "Transfer-Encoding"
+      value: "chunked"
+      tier: Compliant
+  expected:
+    tier: Acceptable
+    reason: NonCompliantHeader
+    required_message_items:
+      - "Some-Custom-Header"
+
+- name: 'Some-Header: value\x01'
+  uri: /foo/bar
+  method: POST
+  version: HTTP/1.1
+  headers:
+    - name: "Some-Custom-Header"
+      value: "Non-Rfc Compliant\x01"
+      tier: NonCompliant
+    - name: "Transfer-Encoding"
+      value: "chunked"
+      tier: Compliant
+  expected:
+    tier: Acceptable
+    reason: NonCompliantHeader
+    required_message_items:
+      - "Some-Custom-Header"

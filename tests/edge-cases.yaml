@@ -1,0 +1,150 @@
+#
+# Contains edge-cases with two or more violations at the same time,
+# to make sure that the most severe one is picked.
+#
+
+- name: 'Bad non-essential header does not shadow bad Content-Length'
+  uri: /foo/bar
+  method: POST
+  version: HTTP/1.1
+  headers:
+    - name: Some-Custom-Header
+      value: "Non-Rfc Compliant\x12"
+      tier: NonCompliant
+    - name: Content-Length
+      value: "1000\x11"
+      tier: Bad
+  expected:
+    tier: Severe
+    reason: BadContentLength
+    required_message_items:
+      - "Content-Length"
+      - "1000\\\\0x11"
+
+- name: 'Bad non-essential header does not shadow bad Transfer-Encoding'
+  uri: /foo/bar
+  method: POST
+  version: HTTP/1.1
+  headers:
+    - name: Some-Custom-Header
+      value: "Non-Rfc Compliant\x11"
+      tier: NonCompliant
+    - name: Transfer-Encoding
+      value: "chunked\x7f"
+      tier: Bad
+  expected:
+    tier: Severe
+    reason: BadTransferEncoding
+    required_message_items:
+      - "Transfer-Encoding"
+      - "chunked\\\\0x7f"
+
+- name: 'Non-compliant character does not shadow bad character'
+  uri: /foo/bar
+  method: PUT
+  version: HTTP/1.1
+  headers:
+    - name: "Some-Custom-Header\t"
+      value: "\x11\x12 But then \x00 which is bad"
+      tier: Bad
+    - name: "Transfer-Encoding\t"
+      value: "chunked"
+      tier: NonCompliant
+  expected:
+    tier: Severe
+    reason: BadHeader
+    required_message_items:
+      - "Some-Custom-Header"
+      # escaped invalid character to be printable from C
+      - "\\\\0x00"
+
+- name: 'Non-compliant customer header does not shadow ambiguous Transfer-Encoding for GET'
+  uri: /foo/bar
+  method: GET
+  version: HTTP/1.1
+  headers:
+    - name: Some-Custom-Header
+      value: "Non Rfc -Compliant\x01"
+      tier: NonCompliant
+    - name: Transfer-Encoding
+      value: chunked
+      tier: NonCompliant
+  expected:
+    tier: Ambiguous
+    reason: UndefinedTransferEncodingSemantics
+    required_message_items:
+      - "Transfer-Encoding"
+
+- name: 'Non-compliant customer header does not shadow ambiguous Content-Length for HEAD'
+  uri: /foo/bar
+  method: HEAD
+  version: HTTP/1.1
+  headers:
+    - name: Some-Custom-Header
+      value: "Non Rfc Compliant\x01"
+      tier: NonCompliant
+    - name: Content-Length
+      value: 9000
+      tier: NonCompliant
+  expected:
+    tier: Ambiguous
+    reason: UndefinedContentLengthSemantics
+    required_message_items:
+      - "Content-Length"
+
+- name: 'Bad header does not shadow other bad headers'
+  uri: /foo/bar
+  method: POST
+  version: HTTP/1.1
+  headers:
+    - name: Some-Custom-Header
+      value: "\x11Rfc Compliant"
+      tier: NonCompliant
+    - name: "Transfer-Encoding"
+      value: "chunked\x80"
+      tier: Bad
+    - name: Content-Length
+      value: "$9000"
+      tier: Bad
+  expected:
+    tier: Severe
+    reason: BadTransferEncoding
+    required_message_items:
+      - "Transfer-Encoding"
+
+- name: 'Bad URI does not shadow essential bad headers'
+  uri: /foo/bar\t/baz
+  method: POST
+  version: HTTP/1.1
+  headers:
+    - name: Some-Custom-Header
+      value: "\x11Rfc Compliant"
+      tier: NonCompliant
+    - name: "Transfer-Encoding"
+      value: "chunked\x80"
+      tier: Bad
+    - name: Content-Length
+      value: "$9000"
+      tier: Bad
+  expected:
+    tier: Severe
+    reason: BadTransferEncoding
+    required_message_items:
+      - "Transfer-Encoding"
+
+- name: 'Bad URI does not shadow essential ambiguous headers'
+  uri: /foo/bar\t/baz
+  method: GET
+  version: HTTP/1.1
+  headers:
+    - name: Some-Custom-Header
+      value: "Non Rfc -Compliant\x01"
+      tier: NonCompliant
+    - name: Content-Length
+      value: 9000
+      tier: NonCompliant
+  expected:
+    tier: Ambiguous
+    reason: UndefinedContentLengthSemantics
+    required_message_items:
+      - "Content-Length"

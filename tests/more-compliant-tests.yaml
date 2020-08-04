@@ -1,0 +1,406 @@
+# Making sure legitimate requests are not misclassified. Some "real-life" examples.
+
+- name: Has a CL in PUT OK
+  uri: /test.html
+  method: PUT
+  version: HTTP/1.1
+  headers:
+    - name: User-Agent
+      value: " Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:68.0) Gecko/20100101 Firefox/68.0"
+      tier: Compliant
+    - name: Accept
+      value: " text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8"
+      tier: Compliant
+    - name: Accept-Language
+      value: " en-US,en;q=0.5"
+      tier: Compliant
+    - name: Accept-Encoding
+      value: " gzip, deflate"
+      tier: Compliant
+    - name: Connection
+      value: " keep-alive"
+      tier: Compliant
+    - name: Upgrade-Insecure-Requests
+      value: " 1"
+      tier: Compliant
+    - name: Content-Length
+      value: " 22220  "
+      tier: Compliant
+  expected:
+    tier: Compliant
+    reason: Compliant
+
+- name: Very many headers
+  uri: /test.html
+  method: PUT
+  version: HTTP/1.1
+  headers:
+    - name: User-Agent
+      value: " Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:68.0) Gecko/20100101 Firefox/68.0"
+      tier: Compliant
+    - name: Upgrade-Insecure-Requests
+      value: " 1"
+      tier: Compliant
+    - name: Content-Length
+      value: " 22220  "
+      tier: Compliant
+    - name: Header-Name-1
+      value: "Header-Value-Some-Ok-String"
+      tier: Compliant
+    - name: Header-Name-2
+      value: "Header-Value-Some-Ok-String"
+      tier: Compliant
+    - name: Header-Name-3
+      value: "Header-Value-Some-Ok-String"
+      tier: Compliant
+    - name: Header-Name-4
+      value: "Header-Value-Some-Ok-String"
+      tier: Compliant
+    - name: Header-Name-5
+      value: "Header-Value-Some-Ok-String"
+      tier: Compliant
+    - name: Header-Name-6
+      value: "Header-Value-Some-Ok-String"
+      tier: Compliant
+    - name: Header-Name-7
+      value: "Header-Value-Some-Ok-String"
+      tier: Compliant
+    - name: Header-Name-8
+      value: "Header-Value-Some-Ok-String"
+      tier: Compliant
+    - name: Header-Name-9
+      value: "Header-Value-Some-Ok-String"
+      tier: Compliant
+    - name: Header-Name-10
+      value: "Header-Value-Some-Ok-String"
+      tier: Compliant
+    - name: Header-Name-11
+      value: "Header-Value-Some-Ok-String"
+      tier: Compliant
+    - name: Header-Name-12
+      value: "Header-Value-Some-Ok-String"
+      tier: Compliant
+    - name: Header-Name-13
+      value: "Header-Value-Some-Ok-String"
+      tier: Compliant
+    - name: Header-Name-14
+      value: "Header-Value-Some-Ok-String"
+      tier: Compliant
+    - name: Header-Name-15
+      value: "Header-Value-Some-Ok-String"
+      tier: Compliant
+    - name: Header-Name-16
+      value: "Header-Value-Some-Ok-String"
+      tier: Compliant
+    - name: Header-Name-17
+      value: "Header-Value-Some-Ok-String"
+      tier: Compliant
+    - name: Header-Name-18
+      value: "Header-Value-Some-Ok-String"
+      tier: Compliant
+    - name: Header-Name-19
+      value: "Header-Value-Some-Ok-String"
+      tier: Compliant
+    - name: Header-Name-20
+      value: "Header-Value-Some-Ok-String"
+      tier: Compliant
+    - name: Header-Name-21
+      value: "Header-Value-Some-Ok-String"
+      tier: Compliant
+    - name: Header-Name-22
+      value: "Header-Value-Some-Ok-String"
+      tier: Compliant
+    - name: Header-Name-23
+      value: "Header-Value-Some-Ok-String"
+      tier: Compliant
+    - name: Header-Name-24
+      value: "Header-Value-Some-Ok-String"
+      tier: Compliant
+    - name: Header-Name-25
+      value: "Header-Value-Some-Ok-String"
+      tier: Compliant
+    - name: Header-Name-26
+      value: "Header-Value-Some-Ok-String"
+      tier: Compliant
+    - name: Header-Name-27
+      value: "Header-Value-Some-Ok-String"
+      tier: Compliant
+    - name: Header-Name-28
+      value: "Header-Value-Some-Ok-String"
+      tier: Compliant
+    - name: Header-Name-29
+      value: "Header-Value-Some-Ok-String"
+      tier: Compliant
+  expected:
+    tier: Compliant
+    reason: Compliant
+
+- name: Has a TE in PUT OK
+  uri: /test.html
+  method: PUT
+  version: HTTP/1.1
+  headers:
+    - name: User-Agent
+      value: " Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:68.0) Gecko/20100101 Firefox/68.0"
+      tier: Compliant
+    - name: Accept
+      value: " text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8"
+      tier: Compliant
+    - name: Accept-Language
+      value: " en-US,en;q=0.5"
+      tier: Compliant
+    - name: Accept-Encoding
+      value: " gzip, deflate"
+      tier: Compliant
+    - name: Connection
+      value: " keep-alive"
+      tier: Compliant
+    - name: Upgrade-Insecure-Requests
+      value: " 1"
+      tier: Compliant
+    - name: Transfer-Encoding
+      value: " chunked"
+      tier: Compliant
+  expected:
+    tier: Compliant
+    reason: Compliant
+- name: HTTP Version.1.1 OK
+  uri: /test.html?a=b&b=c&%dd=%ee
+  method: POST
+  version: HTTP/1.1
+  headers:
+    - name: User-Agent
+      value: " Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:68.0) Gecko/20100101 Firefox/68.0"
+      tier: Compliant
+    - name: Accept
+      value: " text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8"
+      tier: Compliant
+    - name: Accept-Language
+      value: " en-US,en;q=0.5"
+      tier: Compliant
+    - name: Accept-Encoding
+      value: " gzip, deflate"
+      tier: Compliant
+    - name: Content-Type
+      value: " application/x-www-form-urlencoded"
+      tier: Compliant
+    - name: Connection
+      value: " keep-alive"
+      tier: Compliant
+    - name: Upgrade-Insecure-Requests
+      value: " 1"
+      tier: Compliant
+    - name: Transfer-Encoding
+      value: " chunked"
+      tier: Compliant
+  expected:
+    tier: Compliant
+    reason: Compliant
+
+- name: Correct CL OK
+  uri: /test.html
+  method: POST
+  version: HTTP/1.1
+  headers:
+    - name: User-Agent
+      value: " Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:68.0) Gecko/20100101 Firefox/68.0"
+      tier: Compliant
+    - name: Accept
+      value: " text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8"
+      tier: Compliant
+    - name: Accept-Language
+      value: " en-US,en;q=0.5"
+      tier: Compliant
+    - name: Accept-Encoding
+      value: " gzip, deflate"
+      tier: Compliant
+    - name: Content-Type
+      value: " application/x-www-form-urlencoded"
+      tier: Compliant
+    - name: Connection
+      value: " keep-alive"
+      tier: Compliant
+    - name: Upgrade-Insecure-Requests
+      value: " 1"
+      tier: Compliant
+    - name: Content-Length
+      value: " 5"
+      tier: Compliant
+  expected:
+    tier: Compliant
+    reason: Compliant
+- name: Correct TE OK
+  uri: /test.html
+  method: POST
+  version: HTTP/1.1
+  headers:
+    - name: User-Agent
+      value: " Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:68.0) Gecko/20100101 Firefox/68.0"
+      tier: Compliant
+    - name: Accept
+      value: " text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8"
+      tier: Compliant
+    - name: Accept-Language
+      value: " en-US,en;q=0.5"
+      tier: Compliant
+    - name: Accept-Encoding
+      value: " gzip, deflate"
+      tier: Compliant
+    - name: Content-Type
+      value: " application/x-www-form-urlencoded"
+      tier: Compliant
+    - name: Connection
+      value: " keep-alive"
+      tier: Compliant
+    - name: Upgrade-Insecure-Requests
+      value: " 1"
+      tier: Compliant
+    - name: Transfer-Encoding
+      value: " gzip, chunked"
+      tier: Compliant
+  expected:
+    tier: Compliant
+    reason: Compliant
+- name: Large Size OK
+  uri: /test.html
+  method: POST
+  version: HTTP/1.1
+  headers:
+    - name: User-Agent
+      value: " Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:68.0) Gecko/20100101 Firefox/68.0"
+      tier: Compliant
+    - name: Accept
+      value: " text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8"
+      tier: Compliant
+    - name: Accept-Language
+      value: " en-US,en;q=0.5"
+      tier: Compliant
+    - name: Accept-Encoding
+      value: " gzip, deflate"
+      tier: Compliant
+    - name: Content-Type
+      value: " application/x-www-form-urlencoded"
+      tier: Compliant
+    - name: Connection
+      value: " keep-alive"
+      tier: Compliant
+    - name: Upgrade-Insecure-Requests
+      value: " 1"
+      tier: Compliant
+    - name: Content-Length
+      value: " 4000000"
+      tier: Compliant
+    - name: X-test
+      value: "Transfer-Encoding: chunked"
+      tier: Compliant
+  expected:
+    tier: Compliant
+    reason: Compliant
+- name: 'Transfer-Encoding: identity and chunked OK'
+  uri: /test.html
+  method: POST
+  version: HTTP/1.1
+  headers:
+    - name: User-Agent
+      value: " Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:68.0) Gecko/20100101 Firefox/68.0"
+      tier: Compliant
+    - name: Accept
+      value: " text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8"
+      tier: Compliant
+    - name: Accept-Language
+      value: " en-US,en;q=0.5"
+      tier: Compliant
+    - name: Accept-Encoding
+      value: " gzip, deflate"
+      tier: Compliant
+    - name: Content-Type
+      value: " application/x-www-form-urlencoded"
+      tier: Compliant
+    - name: Connection
+      value: " keep-alive"
+      tier: Compliant
+    - name: Upgrade-Insecure-Requests
+      value: " 1"
+      tier: Compliant
+    - name: Transfer-Encoding
+      value: " deflate, identity, chunked"
+      tier: Compliant
+  expected:
+    tier: Compliant
+    reason: Compliant
+- name: Multiple transfer encoding headers in a single request OK
+  uri: /test.html
+  method: POST
+  version: HTTP/1.1
+  headers:
+    - name: User-Agent
+      value: " Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:68.0) Gecko/20100101 Firefox/68.0"
+      tier: Compliant
+    - name: Accept
+      value: " text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8"
+      tier: Compliant
+    - name: Accept-Language
+      value: " en-US,en;q=0.5"
+      tier: Compliant
+    - name: Accept-Encoding
+      value: " gzip, deflate"
+      tier: Compliant
+    - name: Content-Type
+      value: " application/x-www-form-urlencoded"
+      tier: Compliant
+    - name: Connection
+      value: " keep-alive"
+      tier: Compliant
+    - name: Upgrade-Insecure-Requests
+      value: " 1"
+      tier: Compliant
+    - name: Transfer-Encoding
+      value: " gzip"
+      tier: Compliant
+    - name: Transfer-Encoding
+      value: " deflate"
+      tier: Compliant
+    - name: Transfer-Encoding
+      value: " identity"
+      tier: Compliant
+    - name: Transfer-Encoding
+      value: " compress"
+      tier: Compliant
+    - name: Transfer-Encoding
+      value: " chunked"
+      tier: Compliant
+  expected:
+    tier: Compliant
+    reason: Compliant
+- name: TE with custom parameters OK
+  uri: /test.html
+  method: POST
+  version: HTTP/1.1
+  headers:
+    - name: User-Agent
+      value: " Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:68.0) Gecko/20100101 Firefox/68.0"
+      tier: Compliant
+    - name: Accept
+      value: " text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8"
+      tier: Compliant
+    - name: Accept-Language
+      value: " en-US,en;q=0.5"
+      tier: Compliant
+    - name: Accept-Encoding
+      value: " gzip, deflate"
+      tier: Compliant
+    - name: Content-Type
+      value: " application/x-www-form-urlencoded"
+      tier: Compliant
+    - name: Connection
+      value: " keep-alive"
+      tier: Compliant
+    - name: Upgrade-Insecure-Requests
+      value: " 1"
+      tier: Compliant
+    - name: Transfer-Encoding
+      value: " \t\t\t\tchunked;custom_param;\t\t\t\t"
+      tier: Compliant
+  expected:
+    tier: Compliant
+    reason: Compliant

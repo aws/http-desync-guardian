@@ -1,0 +1,850 @@
+# Some "real-life" tests
+
+- name: Has a CL in GET
+  uri: /test.html
+  method: GET
+  version: HTTP/1.1
+  headers:
+    - name: User-Agent
+      value: " Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:68.0) Gecko/20100101 Firefox/68.0"
+      tier: Compliant
+    - name: Accept
+      value: " text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8"
+      tier: Compliant
+    - name: Accept-Language
+      value: " en-US,en;q=0.5"
+      tier: Compliant
+    - name: Accept-Encoding
+      value: " gzip, deflate"
+      tier: Compliant
+    - name: Connection
+      value: " keep-alive"
+      tier: Compliant
+    - name: Upgrade-Insecure-Requests
+      value: " 1"
+      tier: Compliant
+    - name: Content-Length
+      value: " 22"
+      tier: NonCompliant
+  expected:
+    tier: Ambiguous
+    reason: UndefinedContentLengthSemantics
+- name: Has a TE in GET
+  uri: /test.html
+  method: GET
+  version: HTTP/1.1
+  headers:
+    - name: User-Agent
+      value: " Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:68.0) Gecko/20100101 Firefox/68.0"
+      tier: Compliant
+    - name: Accept
+      value: " text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8"
+      tier: Compliant
+    - name: Accept-Language
+      value: " en-US,en;q=0.5"
+      tier: Compliant
+    - name: Accept-Encoding
+      value: " gzip, deflate"
+      tier: Compliant
+    - name: Connection
+      value: " keep-alive"
+      tier: Compliant
+    - name: Upgrade-Insecure-Requests
+      value: " 1"
+      tier: Compliant
+    - name: Transfer-Encoding
+      value: " chunked"
+      tier: NonCompliant
+  expected:
+    tier: Ambiguous
+    reason: UndefinedTransferEncodingSemantics
+- name: HTTP Version.1.0 and TE
+  uri: /test.html
+  method: POST
+  version: HTTP/1.0
+  headers:
+    - name: User-Agent
+      value: " Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:68.0) Gecko/20100101 Firefox/68.0"
+      tier: Compliant
+    - name: Accept
+      value: " text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8"
+      tier: Compliant
+    - name: Accept-Language
+      value: " en-US,en;q=0.5"
+      tier: Compliant
+    - name: Accept-Encoding
+      value: " gzip, deflate"
+      tier: Compliant
+    - name: Content-Type
+      value: " application/x-www-form-urlencoded"
+      tier: Compliant
+    - name: Connection
+      value: " keep-alive"
+      tier: Compliant
+    - name: Upgrade-Insecure-Requests
+      value: " 1"
+      tier: Compliant
+    - name: Transfer-Encoding
+      value: " chunked"
+      tier: NonCompliant
+  expected:
+    tier: Ambiguous
+    reason: UndefinedTransferEncodingSemantics
+    required_message_items:
+      - HTTP/1.0
+- name: Two Identical Fields - CL
+  uri: /test.html
+  method: POST
+  version: HTTP/1.1
+  headers:
+    - name: User-Agent
+      value: " Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:68.0) Gecko/20100101 Firefox/68.0"
+      tier: Compliant
+    - name: Accept
+      value: " text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8"
+      tier: Compliant
+    - name: Accept-Language
+      value: " en-US,en;q=0.5"
+      tier: Compliant
+    - name: Accept-Encoding
+      value: " gzip, deflate"
+      tier: Compliant
+    - name: Content-Type
+      value: " application/x-www-form-urlencoded"
+      tier: Compliant
+    - name: Connection
+      value: " keep-alive"
+      tier: Compliant
+    - name: Upgrade-Insecure-Requests
+      value: " 1"
+      tier: Compliant
+    - name: Content-Length
+      value: " 5"
+      tier: Compliant
+    - name: Content-Length
+      value: " 5"
+      tier: Bad
+  expected:
+    tier: Ambiguous
+    reason: DuplicateContentLength
+    required_message_items:
+      - Content-Length
+- name: Two Identical Fields - TE
+  uri: /test.html
+  method: POST
+  version: HTTP/1.1
+  headers:
+    - name: User-Agent
+      value: " Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:68.0) Gecko/20100101 Firefox/68.0"
+      tier: Compliant
+    - name: Accept
+      value: " text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8"
+      tier: Compliant
+    - name: Accept-Language
+      value: " en-US,en;q=0.5"
+      tier: Compliant
+    - name: Accept-Encoding
+      value: " gzip, deflate"
+      tier: Compliant
+    - name: Content-Type
+      value: " application/x-www-form-urlencoded"
+      tier: Compliant
+    - name: Connection
+      value: " keep-alive"
+      tier: Compliant
+    - name: Upgrade-Insecure-Requests
+      value: " 1"
+      tier: Compliant
+    - name: Transfer-Encoding
+      value: " chunked"
+      tier: Bad
+    - name: Transfer-Encoding
+      value: " chunked"
+      tier: Bad
+    - name: Content-Length
+      value: " 4"
+      tier: Bad
+  expected:
+    tier: Severe
+    reason: MultipleTransferEncodingChunked
+    required_message_items:
+      - Transfer-Encoding
+- name: Chunks Priority on Content-Length
+  uri: /test.html
+  method: POST
+  version: HTTP/1.1
+  headers:
+    - name: User-Agent
+      value: " Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:68.0) Gecko/20100101 Firefox/68.0"
+      tier: Compliant
+    - name: Accept
+      value: " text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8"
+      tier: Compliant
+    - name: Accept-Language
+      value: " en-US,en;q=0.5"
+      tier: Compliant
+    - name: Accept-Encoding
+      value: " gzip, deflate"
+      tier: Compliant
+    - name: Content-Type
+      value: " application/x-www-form-urlencoded"
+      tier: Compliant
+    - name: Connection
+      value: " keep-alive"
+      tier: Compliant
+    - name: Upgrade-Insecure-Requests
+      value: " 1"
+      tier: Compliant
+    - name: Content-Length
+      value: " 4"
+      tier: Bad
+    - name: Transfer-Encoding
+      value: " chunked"
+      tier: Compliant
+  expected:
+    tier: Ambiguous
+    reason: BothTeClPresent
+- name: Null in Headers
+  uri: /test.html
+  method: POST
+  version: HTTP/1.1
+  headers:
+    - name: User-Agent
+      value: " Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:68.0) Gecko/20100101 Firefox/68.0"
+      tier: Compliant
+    - name: Accept
+      value: " text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8"
+      tier: Compliant
+    - name: Accept-Language
+      value: " en-US,en;q=0.5"
+      tier: Compliant
+    - name: Bad-Accept-Encoding
+      value: " gzip, \x00deflate"
+      tier: Bad
+    - name: Content-Type
+      value: " application/x-www-form-urlencoded"
+      tier: Compliant
+    - name: Connection
+      value: " keep-alive"
+      tier: Compliant
+    - name: Upgrade-Insecure-Requests
+      value: " 1"
+      tier: Compliant
+    - name: Transfer-Encoding
+      value: " chunked"
+      tier: Compliant
+    - name: Content-Length
+      value: " 4"
+      tier: Bad
+  expected:
+    tier: Severe
+    reason: BadHeader
+- name: CRLF
+  uri: /test.html
+  method: POST
+  version: HTTP/1.1
+  headers:
+    - name: User-Agent
+      value: " Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:68.0) Gecko/20100101 Firefox/68.0"
+      tier: Compliant
+    - name: Accept
+      value: " text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8"
+      tier: Compliant
+    - name: Accept-Language
+      value: " en-US,en;q=0.5"
+      tier: Compliant
+    - name: Accept-Encoding
+      value: " gzip, deflate"
+      tier: Compliant
+    - name: Content-Type
+      value: " application/x-www-form-urlencoded"
+      tier: Compliant
+    - name: Connection
+      value: " keep-alive"
+      tier: Compliant
+    - name: Upgrade-Insecure-Requests
+      value: " 1"
+      tier: Compliant
+    - name: Content-Length
+      value: " 4"
+      tier: Compliant
+    - name: "\x00Transfer-Encoding"
+      value: " chunked"
+      tier: Bad
+  expected:
+    tier: Severe
+    reason: BadHeader
+- name: Size Issue
+  uri: /test.html
+  method: POST
+  version: HTTP/1.1
+  headers:
+    - name: User-Agent
+      value: " Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:68.0) Gecko/20100101 Firefox/68.0"
+      tier: Compliant
+    - name: Accept
+      value: " text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8"
+      tier: Compliant
+    - name: Accept-Language
+      value: " en-US,en;q=0.5"
+      tier: Compliant
+    - name: Accept-Encoding
+      value: " gzip, deflate"
+      tier: Compliant
+    - name: Content-Type
+      value: " application/x-www-form-urlencoded"
+      tier: Compliant
+    - name: Connection
+      value: " keep-alive"
+      tier: Compliant
+    - name: Upgrade-Insecure-Requests
+      value: " 1"
+      tier: Compliant
+    - name: Content-Length
+      value: " 4"
+      tier: Compliant
+    - name: X-test
+      value: " x\rTransfer-Encoding: chunked"
+      tier: Bad
+  expected:
+    tier: Severe
+    reason: BadHeader
+- name: 'Transfer-Encoding[tab]: chunked'
+  uri: /test.html
+  method: POST
+  version: HTTP/1.1
+  headers:
+    - name: User-Agent
+      value: " Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:68.0) Gecko/20100101 Firefox/68.0"
+      tier: Compliant
+    - name: Accept
+      value: " text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8"
+      tier: Compliant
+    - name: Accept-Language
+      value: " en-US,en;q=0.5"
+      tier: Compliant
+    - name: Accept-Encoding
+      value: " gzip, deflate"
+      tier: Compliant
+    - name: Content-Type
+      value: " application/x-www-form-urlencoded"
+      tier: Compliant
+    - name: Connection
+      value: " keep-alive"
+      tier: Compliant
+    - name: Upgrade-Insecure-Requests
+      value: " 1"
+      tier: Compliant
+    - name: "Transfer-Encoding\t"
+      value: " chunked"
+      tier: NonCompliant
+    - name: Content-Length
+      value: " 4"
+      tier: Bad
+  expected:
+    tier: Ambiguous
+    reason: SuspiciousHeader
+- name: '\rTransfer-Encoding: chunked'
+  uri: /test.html
+  method: POST
+  version: HTTP/1.1
+  headers:
+    - name: User-Agent
+      value: " Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:68.0) Gecko/20100101 Firefox/68.0"
+      tier: Compliant
+    - name: Accept
+      value: " text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8"
+      tier: Compliant
+    - name: Accept-Language
+      value: " en-US,en;q=0.5"
+      tier: Compliant
+    - name: Accept-Encoding
+      value: " gzip, deflate"
+      tier: Compliant
+    - name: Content-Type
+      value: " application/x-www-form-urlencoded"
+      tier: Compliant
+    - name: Connection
+      value: " keep-alive"
+      tier: Compliant
+    - name: Upgrade-Insecure-Requests
+      value: " 1"
+      tier: Compliant
+    - name: "\rTransfer-Encoding"
+      value: " chunked"
+      tier: Bad
+    - name: Content-Length
+      value: " 4"
+      tier: Compliant
+  expected:
+    tier: Severe
+    reason: BadHeader
+- name: '\rTransfer-Encoding: chunked without CL'
+  uri: /test.html
+  method: POST
+  version: HTTP/1.1
+  headers:
+    - name: User-Agent
+      value: " Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:68.0) Gecko/20100101 Firefox/68.0"
+      tier: Compliant
+    - name: Accept
+      value: " text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8"
+      tier: Compliant
+    - name: Accept-Language
+      value: " en-US,en;q=0.5"
+      tier: Compliant
+    - name: Accept-Encoding
+      value: " gzip, deflate"
+      tier: Compliant
+    - name: Content-Type
+      value: " application/x-www-form-urlencoded"
+      tier: Compliant
+    - name: Connection
+      value: " keep-alive"
+      tier: Compliant
+    - name: Upgrade-Insecure-Requests
+      value: " 1"
+      tier: Compliant
+    - name: "\rTransfer-Encoding"
+      value: " chunked"
+      tier: Bad
+  expected:
+    tier: Severe
+    reason: BadHeader
+- name: '\rContent-Length without TE'
+  uri: /test.html
+  method: POST
+  version: HTTP/1.1
+  headers:
+    - name: User-Agent
+      value: " Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:68.0) Gecko/20100101 Firefox/68.0"
+      tier: Compliant
+    - name: Accept
+      value: " text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8"
+      tier: Compliant
+    - name: Accept-Language
+      value: " en-US,en;q=0.5"
+      tier: Compliant
+    - name: Accept-Encoding
+      value: " gzip, deflate"
+      tier: Compliant
+    - name: Content-Type
+      value: " application/x-www-form-urlencoded"
+      tier: Compliant
+    - name: Connection
+      value: " keep-alive"
+      tier: Compliant
+    - name: Upgrade-Insecure-Requests
+      value: " 1"
+      tier: Compliant
+    - name: "\rContent-Length"
+      value: " 1000"
+      tier: Bad
+    - name: "Content-Length"
+      value: " 100"
+      tier: Compliant
+  expected:
+    tier: Severe
+    reason: BadHeader
+- name: 'Transfer-Encoding: chunk'
+  uri: /test.html
+  method: POST
+  version: HTTP/1.1
+  headers:
+    - name: User-Agent
+      value: " Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:68.0) Gecko/20100101 Firefox/68.0"
+      tier: Compliant
+    - name: Accept
+      value: " text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8"
+      tier: Compliant
+    - name: Accept-Language
+      value: " en-US,en;q=0.5"
+      tier: Compliant
+    - name: Accept-Encoding
+      value: " gzip, deflate"
+      tier: Compliant
+    - name: Content-Type
+      value: " application/x-www-form-urlencoded"
+      tier: Compliant
+    - name: Connection
+      value: " keep-alive"
+      tier: Compliant
+    - name: Upgrade-Insecure-Requests
+      value: " 1"
+      tier: Compliant
+    - name: Transfer-Encoding
+      value: " chunk"
+      tier: Bad
+    - name: Content-Length
+      value: " 4"
+      tier: Bad
+  expected:
+    tier: Severe
+    reason: BadTransferEncoding
+- name: 'Transfer-Encoding: identity and Content-Length'
+  uri: /test.html
+  method: POST
+  version: HTTP/1.1
+  headers:
+    - name: User-Agent
+      value: " Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:68.0) Gecko/20100101 Firefox/68.0"
+      tier: Compliant
+    - name: Accept
+      value: " text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8"
+      tier: Compliant
+    - name: Accept-Language
+      value: " en-US,en;q=0.5"
+      tier: Compliant
+    - name: Accept-Encoding
+      value: " gzip, deflate"
+      tier: Compliant
+    - name: Content-Type
+      value: " application/x-www-form-urlencoded"
+      tier: Compliant
+    - name: Connection
+      value: " keep-alive"
+      tier: Compliant
+    - name: Upgrade-Insecure-Requests
+      value: " 1"
+      tier: Compliant
+    - name: Transfer-Encoding
+      value: " deflate"
+      tier: Compliant
+    - name: Content-Length
+      value: " 4"
+      tier: Bad
+  expected:
+    tier: Ambiguous
+    reason: BothTeClPresent
+- name: 'Transfer-Encoding: xchunked'
+  uri: /test.html
+  method: POST
+  version: HTTP/1.1
+  headers:
+    - name: User-Agent
+      value: " Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:68.0) Gecko/20100101 Firefox/68.0"
+      tier: Compliant
+    - name: Accept
+      value: " text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8"
+      tier: Compliant
+    - name: Accept-Language
+      value: " en-US,en;q=0.5"
+      tier: Compliant
+    - name: Accept-Encoding
+      value: " gzip, deflate"
+      tier: Compliant
+    - name: Content-Type
+      value: " application/x-www-form-urlencoded"
+      tier: Compliant
+    - name: Connection
+      value: " keep-alive"
+      tier: Compliant
+    - name: Upgrade-Insecure-Requests
+      value: " 1"
+      tier: Compliant
+    - name: Transfer-Encoding
+      value: " xchunked"
+      tier: Bad
+    - name: Content-Length
+      value: " 4"
+      tier: Bad
+  expected:
+    tier: Severe
+    reason: BadTransferEncoding
+- name: Multiple transfer encoding headers in a single request
+  uri: /test.html
+  method: POST
+  version: HTTP/1.1
+  headers:
+    - name: User-Agent
+      value: " Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:68.0) Gecko/20100101 Firefox/68.0"
+      tier: Compliant
+    - name: Accept
+      value: " text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8"
+      tier: Compliant
+    - name: Accept-Language
+      value: " en-US,en;q=0.5"
+      tier: Compliant
+    - name: Accept-Encoding
+      value: " gzip, deflate"
+      tier: Compliant
+    - name: Content-Type
+      value: " application/x-www-form-urlencoded"
+      tier: Compliant
+    - name: Connection
+      value: " keep-alive"
+      tier: Compliant
+    - name: Upgrade-Insecure-Requests
+      value: " 1"
+      tier: Compliant
+    - name: Transfer-Encoding
+      value: " gzip"
+      tier: Compliant
+    - name: Transfer-Encoding
+      value: " deflate"
+      tier: Compliant
+    - name: Transfer-Encoding
+      value: " identity"
+      tier: Compliant
+    - name: Transfer-Encoding
+      value: " compress"
+      tier: Compliant
+    - name: Transfer-Encoding
+      value: " chunked"
+      tier: Compliant
+    - name: Content-Length
+      value: " 4"
+      tier: Bad
+  expected:
+    tier: Ambiguous
+    reason: BothTeClPresent
+- name: Mixed case
+  uri: /test.html
+  method: POST
+  version: HTTP/1.1
+  headers:
+    - name: User-Agent
+      value: " Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:68.0) Gecko/20100101 Firefox/68.0"
+      tier: Compliant
+    - name: Accept
+      value: " text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8"
+      tier: Compliant
+    - name: Accept-Language
+      value: " en-US,en;q=0.5"
+      tier: Compliant
+    - name: Accept-Encoding
+      value: " gzip, deflate"
+      tier: Compliant
+    - name: Content-Type
+      value: " application/x-www-form-urlencoded"
+      tier: Compliant
+    - name: Connection
+      value: " keep-alive"
+      tier: Compliant
+    - name: Upgrade-Insecure-Requests
+      value: " 1"
+      tier: Compliant
+    - name: Transfer-Encoding
+      value: " \t\t\t\tchunked;custom_param;\t\t\t\t"
+      tier: Compliant
+    - name: Content-Length
+      value: " 4"
+      tier: Bad
+  expected:
+    tier: Ambiguous
+    reason: BothTeClPresent
+- name: Invalid Transfer-Encoding
+  uri: /test.html
+  method: POST
+  version: HTTP/1.1
+  headers:
+    - name: User-Agent
+      value: " Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:68.0) Gecko/20100101 Firefox/68.0"
+      tier: Compliant
+    - name: Accept
+      value: " text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8"
+      tier: Compliant
+    - name: Accept-Language
+      value: " en-US,en;q=0.5"
+      tier: Compliant
+    - name: Accept-Encoding
+      value: " gzip, deflate"
+      tier: Compliant
+    - name: Content-Type
+      value: " application/x-www-form-urlencoded"
+      tier: Compliant
+    - name: Connection
+      value: " keep-alive"
+      tier: Compliant
+    - name: Upgrade-Insecure-Requests
+      value: " 1"
+      tier: Compliant
+    - name: Transfer-Encoding
+      value: " chunked,chunked"
+      tier: Bad
+    - name: Content-Length
+      value: " 4"
+      tier: Bad
+  expected:
+    tier: Severe
+    reason: MultipleTransferEncodingChunked
+- name: Chunks Priority on Content-Length.1
+  uri: /test.html
+  method: POST
+  version: HTTP/1.1
+  headers:
+    - name: User-Agent
+      value: " Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:68.0) Gecko/20100101 Firefox/68.0"
+      tier: Compliant
+    - name: Accept
+      value: " text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8"
+      tier: Compliant
+    - name: Accept-Language
+      value: " en-US,en;q=0.5"
+      tier: Compliant
+    - name: Accept-Encoding
+      value: " gzip, deflate"
+      tier: Compliant
+    - name: Content-Type
+      value: " application/x-www-form-urlencoded"
+      tier: Compliant
+    - name: Connection
+      value: " keep-alive"
+      tier: Compliant
+    - name: Upgrade-Insecure-Requests
+      value: " 1"
+      tier: Compliant
+    - name: TrAnSfEr-EnCoDiNg
+      value: " ChUnKeD"
+      tier: Compliant
+    - name: Content-Length
+      value: " 4"
+      tier: Bad
+  expected:
+    tier: Ambiguous
+    reason: BothTeClPresent
+- name: Chunks Priority on Content-Length.2
+  uri: /test.html
+  method: POST
+  version: HTTP/1.1
+  headers:
+    - name: User-Agent
+      value: " Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:68.0) Gecko/20100101 Firefox/68.0"
+      tier: Compliant
+    - name: Accept
+      value: " text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8"
+      tier: Compliant
+    - name: Accept-Language
+      value: " en-US,en;q=0.5"
+      tier: Compliant
+    - name: Accept-Encoding
+      value: " gzip, deflate"
+      tier: Compliant
+    - name: Content-Type
+      value: " application/x-www-form-urlencoded"
+      tier: Compliant
+    - name: Connection
+      value: " keep-alive"
+      tier: Compliant
+    - name: Upgrade-Insecure-Requests
+      value: " 1"
+      tier: Compliant
+    - name: Transfer-Encoding
+      value: " chunked"
+      tier: Compliant
+    - name: Transfer-Encoding
+      value: " cow"
+      tier: Bad
+    - name: Content-Length
+      value: " 6"
+      tier: Bad
+  expected:
+    tier: Severe
+    reason: BadTransferEncoding
+
+- name: '\x00Transfer-Encoding: chunked'
+  uri: /test.html
+  method: POST
+  version: HTTP/1.1
+  headers:
+    - name: User-Agent
+      value: " Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:68.0) Gecko/20100101 Firefox/68.0"
+      tier: Compliant
+    - name: Accept
+      value: " text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8"
+      tier: Compliant
+    - name: Accept-Language
+      value: " en-US,en;q=0.5"
+      tier: Compliant
+    - name: Accept-Encoding
+      value: " gzip, deflate"
+      tier: Compliant
+    - name: Content-Type
+      value: " application/x-www-form-urlencoded"
+      tier: Compliant
+    - name: Connection
+      value: " keep-alive"
+      tier: Compliant
+    - name: Upgrade-Insecure-Requests
+      value: " 1"
+      tier: Compliant
+    - name: Content-Length
+      value: " 6"
+      tier: Compliant
+    - name: "\x00Transfer-Encoding"
+      value: " chunked"
+      tier: Bad
+  expected:
+    tier: Severe
+    reason: BadHeader
+- name: 'Transfer-Encoding: \x00chunked'
+  uri: /test.html
+  method: POST
+  version: HTTP/1.1
+  headers:
+    - name: User-Agent
+      value: " Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:68.0) Gecko/20100101 Firefox/68.0"
+      tier: Compliant
+    - name: Accept
+      value: " text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8"
+      tier: Compliant
+    - name: Accept-Language
+      value: " en-US,en;q=0.5"
+      tier: Compliant
+    - name: Accept-Encoding
+      value: " gzip, deflate"
+      tier: Compliant
+    - name: Content-Type
+      value: " application/x-www-form-urlencoded"
+      tier: Compliant
+    - name: Connection
+      value: " keep-alive"
+      tier: Compliant
+    - name: Upgrade-Insecure-Requests
+      value: " 1"
+      tier: Compliant
+    - name: "Transfer-Encoding"
+      value: " \x00chunked"
+      tier: Bad
+    - name: Content-Length
+      value: " 6"
+      tier: Bad
+  expected:
+    tier: Severe
+    reason: BadHeader
+
+- name: Send small (1614 bytes) request, transfer encoded request
+  uri: /test.html
+  method: POST
+  version: HTTP/1.1
+  headers:
+    - name: User-Agent
+      value: " Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:68.0) Gecko/20100101 Firefox/68.0"
+      tier: Compliant
+    - name: Accept
+      value: " text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8"
+      tier: Compliant
+    - name: Accept-Language
+      value: " en-US,en;q=0.5"
+      tier: Compliant
+    - name: Accept-Encoding
+      value: " gzip, deflate"
+      tier: Compliant
+    - name: Content-Type
+      value: " application/x-www-form-urlencoded"
+      tier: Compliant
+    - name: Connection
+      value: " keep-alive"
+      tier: Compliant
+    - name: Upgrade-Insecure-Requests
+      value: " 1"
+      tier: Compliant
+    - name: TrAnSfEr-EnCoDiNg
+      value: " ChUnKeD"
+      tier: Compliant
+    - name: Content-Length
+      value: " 6"
+      tier: Bad
+  expected:
+    tier: Ambiguous
+    reason: BothTeClPresent

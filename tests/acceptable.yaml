@@ -1,0 +1,141 @@
+#
+# It is OK to tolerate some deviations from RFC, as long as they
+# do not bring risks of HTTP DeSync attacks.
+# If Transfer-Encoding/Content-Length are good, and no other
+# critical violations are found, let it flow.
+#
+
+- name: No TE/CL headers, some others are non-compliant
+  uri: /foo/bar
+  method: PUT
+  version: HTTP/1.1
+  headers:
+    - name: "x-my-custom-header "
+      value: "some value"
+      tier: NonCompliant
+    - name: "x-my-second-custom-header"
+      value: "some value"
+      tier: Compliant
+  expected:
+    tier: Acceptable
+    reason: NonCompliantHeader
+    required_message_items:
+      - "x-my-custom-header"
+
+- name: TE and some others are non-compliant
+  uri: /foo/bar
+  method: PUT
+  version: HTTP/1.1
+  headers:
+    - name: "x-my-custom-header "
+      value: "some value"
+      tier: NonCompliant
+    - name: "Transfer-Encoding"
+      value: "chunked"
+      tier: Compliant
+  expected:
+    tier: Acceptable
+    reason: NonCompliantHeader
+    required_message_items:
+      - "x-my-custom-header"
+
+- name: A non-essential header with a non-printable character (x01)
+  uri: /foo/bar
+  method: PUT
+  version: HTTP/1.1
+  headers:
+    - name: "\x01x-my-custom-header"
+      value: "some value"
+      tier: NonCompliant
+    - name: "Transfer-Encoding"
+      value: "chunked"
+      tier: Compliant
+  expected:
+    tier: Acceptable
+    reason: NonCompliantHeader
+    required_message_items:
+      - "x-my-custom-header"
+
+- name: CL and some others are non-compliant
+  uri: /foo/bar
+  method: PUT
+  version: HTTP/1.1
+  headers:
+    - name: "x-my-custom-header "
+      value: "some value"
+      tier: NonCompliant
+    - name: "Content-Length"
+      value: 10000
+      tier: Compliant
+  expected:
+    tier: Acceptable
+    reason: NonCompliantHeader
+    required_message_items:
+      - "x-my-custom-header"
+
+# https://tools.ietf.org/html/rfc7231#section-4.3
+# A payload within a GET/HEAD request message has no defined semantics.
+# However, Content-Length: 0 is safe for GET/HEAD
+- name: 'Get with a body and Content-Length:0'
+  uri: /foo/bar
+  method: GET
+  version: HTTP/1.1
+  headers:
+    - name: Content-Length
+      value: 0
+      tier: NonCompliant
+  expected:
+    tier: Acceptable
+    reason: GetHeadZeroContentLength
+    required_message_items:
+      - "Content-Length"
+
+- name: 'Get with a body and Content-Length:0'
+  uri: /foo/bar
+  method: HEAD
+  version: HTTP/1.1
+  headers:
+    - name: Content-Length
+      value: 0
+      tier: NonCompliant
+  expected:
+    tier: Acceptable
+    reason: GetHeadZeroContentLength
+    required_message_items:
+      - "Content-Length"
+
+- name: "Non-RFC, but OK HTTP/0.9"
+  uri: /foo/bar
+  method: GET
+  version: HTTP/0.9
+  headers:
+    - name: X-My-Header
+      value: some value
+      tier: Compliant
+  expected:
+    tier: Acceptable
+    reason: NonCompliantVersion
+
+- name: "Empty version, which means HTTP/0.9"
+  uri: /foo/bar
+  method: GET
+  version: ""
+  headers:
+    - name: X-My-Header
+      value: some value
+      tier: Compliant
+  expected:
+    tier: Acceptable
+    reason: NonCompliantVersion
+
+- name: "Unknown but OK HTTP/1.2"
+  uri: /foo/bar
+  method: GET
+  version: HTTP/1.2
+  headers:
+    - name: X-My-Header
+      value: some value
+      tier: Compliant
+  expected:
+    tier: Acceptable
+    reason: NonCompliantVersion
