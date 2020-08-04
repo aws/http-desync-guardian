@@ -1,4 +1,4 @@
-![](docs/http-desync-guardian-logo.png)
+<img src="docs/http-desync-guardian-logo.png" width="200">
 
 [![Apache 2 License](https://img.shields.io/github/license/awslabs/s2n.svg)](http://aws.amazon.com/apache-2-0/)
 
@@ -85,7 +85,7 @@ AWS Security via our [vulnerability reporting page](http://aws.amazon.com/securi
 
 ## Security
 
-See [CONTRIBUTING](CONTRIBUTING.md#security-issue-notifications) for more information.
+See [CONTRIBUTING](CONTRIBUTING.md) for more information.
 
 ## License
 
