@@ -12,8 +12,6 @@
 /// express or implied. See the License for the specific language governing
 /// permissions and limitations under the License.
 ///
-extern crate cbindgen;
-
 use std::env;
 use std::fs::File;
 use std::io::Write;
@@ -116,10 +114,4 @@ fn generate_lookup_tables() {
 
 fn main() {
     generate_lookup_tables();
-
-    let crate_dir = env::var("CARGO_MANIFEST_DIR").expect("CARGO_MANIFEST_DIR variable is not set");
-    let out_dir = env::var("OUT_DIR").expect("OUT_DIR variable is not set");
-    cbindgen::generate(&crate_dir)
-        .unwrap()
-        .write_to_file(format!("{}/http_desync_guardian.h", out_dir));
 }
