@@ -1,5 +1,6 @@
-Cargo.lock
 build/
 target/
 .cargo/
 .idea/
+Cargo.lock
+http_desync_guardian.h
