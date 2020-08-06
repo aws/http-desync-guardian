@@ -1,6 +1,7 @@
 <img src="docs/http-desync-guardian-logo.png" width="200">
 
 [![Apache 2 License](https://img.shields.io/github/license/awslabs/s2n.svg)](http://aws.amazon.com/apache-2-0/)
+![Tests](https://github.com/aws/http-desync-guardian/workflows/Tests/badge.svg)
 
 Overview
 ========
