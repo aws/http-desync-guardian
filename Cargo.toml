@@ -21,9 +21,6 @@ smallvec = "1.2"
 strum = "0.18"
 strum_macros = "0.18"
 
-[build-dependencies]
-cbindgen = "0.13"
-
 [dev-dependencies]
 snailquote = "0.3"
 yaml-rust = "0.4"

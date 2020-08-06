@@ -35,7 +35,11 @@ Usage from C
 
 This library is designed to be primarily used from HTTP engines written in `C/C++`.  
 
-Run `cargo build --release` and see generated `target/release/build/http_desync_guardian-*/out/http_desync_guardian.h`.
+1. Install [cbindgen](https://github.com/eqrion/cbindgen#cbindgen-----): `cargo install --force cbindgen`
+1. Generate the header file: 
+   * Run `cbindgen --output http_desync_guardian.h --lang c` for C.
+   * Run `cbindgen --output http_desync_guardian.h --lang c++` for C++.
+1. Run `cargo build --release`. The binaries are in `./target/release/libhttp_desync_guardian.*` files.
 
 Learn more: [generic](./misc/demo-c) and [Nginx](./misc/demo-nginx) examples.
 
@@ -86,7 +90,7 @@ AWS Security via our [vulnerability reporting page](http://aws.amazon.com/securi
 
 ## Security
 
-See [CONTRIBUTING](./CONTRIBUTING.md) for more information.
+See [CONTRIBUTING](./CONTRIBUTING.md#contributing-guidelines) for more information.
 
 ## License
 
