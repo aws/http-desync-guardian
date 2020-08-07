@@ -40,7 +40,7 @@ For `Blocked` requests the client connection must be closed.
     * `UndefinedTransferEncodingSemantics` - Transfer-Encoding for GET/HEAD requests
     * `DuplicateContentLength` - duplicated Content-Length header (same value)
     * `BothTeClPresent` - both Transfer-Encoding and Content-Length are present in the request
-    * `SuspiciousHeader` (Severe for CloudFront) - a header that can be normalized to Transfer-Encoding or Content-Length using common text normalization techniques (sanitation, case normalization, delimiters normalization).
+    * `SuspiciousHeader` - a header that can be normalized to `Transfer-Encoding` or `Content-Length` using common text normalization techniques (sanitation, case normalization, delimiters normalization).
 * `Severe`
     * `BadHeader` - header containing null-character or CR
     * `BadUri` - URI containing null-character or CR
