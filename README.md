@@ -15,7 +15,7 @@ Overview
   * [RFC 2616](https://tools.ietf.org/html/rfc2616) - 1999
   * [RFC 7230](https://tools.ietf.org/html/rfc7230) - 2014
 
-This means there is a variate of servers and clients, which might have different views on request boundaries, creating opportunities for desynchronization attacks (a.k.a. HTTP Desync). 	 
+This means there is a variety of servers and clients, which might have different views on request boundaries, creating opportunities for desynchronization attacks (a.k.a. HTTP Desync). 	 
   
 It might seem simple to follow the latest RFC recommendations. However, for large scale systems that have been there for a while, it may come with unacceptable availability impact.	 
   
