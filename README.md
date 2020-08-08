@@ -15,9 +15,13 @@ Overview
   * [RFC 2616](https://tools.ietf.org/html/rfc2616) - 1999
   * [RFC 7230](https://tools.ietf.org/html/rfc7230) - 2014
 
-Which means there are pleanty of servers and clients which might have different views on request boundaries, which creates opportunities for desynchronization attacks (a.k.a. HTTP Desync). 
-
-It might seem simple to follow the latest RFC recommendations, however for large scale systems that have been there for a while it may come with unacceptable availability impact.
+This means there is a variate of servers and clients, which might have different views on request boundaries, creating opportunities for desynchronization attacks (a.k.a. HTTP Desync). 	 
+  
+It might seem simple to follow the latest RFC recommendations. However, for large scale systems that have been there for a while, it may come with unacceptable availability impact.	 
+  
+`http_desync_guardian` library is designed to analyze HTTP requests to prevent HTTP Desync attacks, balancing security and availability. 	 
+  
+It classifies requests into different [categories](/docs#request-classification) and provides recommendations on how each tier should be handled.
 
 `http_desync_guardian` library is designed to analyze HTTP requests to prevent HTTP Desync attacks, balancing security and availability. 
 It classifies request into different [categories](/docs#request-classification) and provides recommendations on how each tier should be handled.
