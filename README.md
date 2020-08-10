@@ -19,10 +19,6 @@ This means there is a variety of servers and clients, which might have different
   
 It might seem simple to follow the latest RFC recommendations. However, for large scale systems that have been there for a while, it may come with unacceptable availability impact.	 
   
-`http_desync_guardian` library is designed to analyze HTTP requests to prevent HTTP Desync attacks, balancing security and availability. 	 
-  
-It classifies requests into different [categories](/docs#request-classification) and provides recommendations on how each tier should be handled.
-
 `http_desync_guardian` library is designed to analyze HTTP requests to prevent HTTP Desync attacks, balancing security and availability. 
 It classifies request into different [categories](/docs#request-classification) and provides recommendations on how each tier should be handled.
 
