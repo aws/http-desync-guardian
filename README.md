@@ -20,9 +20,9 @@ This means there is a variety of servers and clients, which might have different
 It might seem simple to follow the latest RFC recommendations. However, for large scale systems that have been there for a while, it may come with unacceptable availability impact.	 
   
 `http_desync_guardian` library is designed to analyze HTTP requests to prevent HTTP Desync attacks, balancing security and availability. 
-It classifies request into different [categories](/docs#request-classification) and provides recommendations on how each tier should be handled.
+It classifies requests into different [categories](/docs#request-classification) and provides recommendations on how each tier should be handled.
 
-It can be used to either for raw HTTP request headers or already parsed by an HTTP engine.
+It can be used either for raw HTTP request headers or already parsed by an HTTP engine.
 Consumers may configure logging and metrics collection.
 Logging is rate limited and all user data is obfuscated. 
 
