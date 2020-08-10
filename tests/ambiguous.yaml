@@ -397,6 +397,20 @@
     required_message_items:
       - "HTTP/0.9"
 
+- name: 'Content-Length for HTTP/0.9'
+  uri: /foo/bar
+  method: POST
+  version: HTTP/0.9
+  headers:
+    - name: Content-Length
+      value: 100
+      tier: NonCompliant
+  expected:
+    tier: Ambiguous
+    reason: UndefinedContentLengthSemantics
+    required_message_items:
+      - "HTTP/0.9"
+
 - name: "Transfer-Encoding for empty protocol, which is HTTP/0.9"
   uri: /foo/bar
   method: POST
@@ -408,6 +422,20 @@
   expected:
     tier: Ambiguous
     reason: UndefinedTransferEncodingSemantics
+    required_message_items:
+      - "HTTP/0.9"
+
+- name: "Content-Length for empty protocol, which is HTTP/0.9"
+  uri: /foo/bar
+  method: POST
+  version: ""
+  headers:
+    - name: Content-Length
+      value: 100
+      tier: NonCompliant
+  expected:
+    tier: Ambiguous
+    reason: UndefinedContentLengthSemantics
     required_message_items:
       - "HTTP/0.9"
 

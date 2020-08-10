@@ -39,10 +39,13 @@ Priorities
 Supported HTTP versions
 ======
 
-* `HTTP/0.9` - all traffic is classified as `Acceptable`.
+The main focus of this library is `HTTP/1.1`. See [tests](./tests)) for all covered cases. Predecessors of `HTTP/1.1` don't support connection re-use which limits opportunities for HTTP Desync,
+however some proxies may upgrade such requests to `HTTP/1.1` and re-use backend connections, which may allow to craft malicious `HTTP/1.0` requests. 
+That's why they are analyzed using the same criteria as `HTTP/1.1`. For other protocol versions have the following exceptions:
+
+* `HTTP/0.9` requests are never considered `Compliant`, but are classified as `Acceptable`. If any of `Content-Length`/`Transfer-Encoding` is present then it's `Ambiguous`.
 * `HTTP/1.0` - the presence of `Transfer-Encoding` makes a request `Ambiguous`.
-* `HTTP/1.1` - the main focus of this library (see [tests](./tests)).
-* `HTTP/2`+ - out of scope. But if your proxy downgrades `HTTP/2` to `HTTP/1.1`, make sure the outgoing request is analyzed. 
+* `HTTP/2+` is out of scope. But if your proxy downgrades `HTTP/2` to `HTTP/1.1`, make sure the outgoing request is analyzed. 
 
 See [documentation](./docs) to learn more.
 

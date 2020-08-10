@@ -653,21 +653,7 @@ impl<'a> HttpRequestData<'a> {
             return;
         }
 
-        if self.version <= HTTP_1_0 && !te_indexes.is_empty() {
-            {
-                upgrade_verdict!(
-                    result_tier,
-                    RequestSafetyTier::Ambiguous,
-                    ErrorMessage::from_message(
-                        ClassificationReason::UndefinedTransferEncodingSemantics,
-                        to_quoted_ascii(self.version),
-                    )
-                );
-            }
-            // mark all message-body headers as bad
-            // as at this point it's not clear how to interpret them
-            self.mark_all_as(te_indexes, HeaderSafetyTier::NonCompliant);
-            self.mark_all_as(cl_indexes, HeaderSafetyTier::Bad);
+        if self.not_valid_for_predecessor_versions(result_tier, te_indexes, cl_indexes) {
             return;
         }
 
@@ -690,6 +676,48 @@ impl<'a> HttpRequestData<'a> {
                     self.headers[cl_indexes[0]].clone(),
                 )
             );
+        }
+    }
+
+    fn not_valid_for_predecessor_versions(
+        &mut self,
+        result_tier: &mut RequestAnalysisState,
+        te_indexes: &[usize],
+        cl_indexes: &[usize],
+    ) -> bool {
+        if self.version <= HTTP_1_0 && !te_indexes.is_empty() {
+            {
+                upgrade_verdict!(
+                    result_tier,
+                    RequestSafetyTier::Ambiguous,
+                    ErrorMessage::from_message(
+                        ClassificationReason::UndefinedTransferEncodingSemantics,
+                        to_quoted_ascii(self.version),
+                    )
+                );
+            }
+            // mark all message-body headers as bad
+            // as at this point it's not clear how to interpret them
+            self.mark_all_as(te_indexes, HeaderSafetyTier::NonCompliant);
+            self.mark_all_as(cl_indexes, HeaderSafetyTier::Bad);
+            true
+        } else if self.version < HTTP_1_0 && !cl_indexes.is_empty() {
+            {
+                upgrade_verdict!(
+                    result_tier,
+                    RequestSafetyTier::Ambiguous,
+                    ErrorMessage::from_message(
+                        ClassificationReason::UndefinedContentLengthSemantics,
+                        to_quoted_ascii(self.version),
+                    )
+                );
+            }
+            // mark all message-body headers as bad
+            // as at this point it's not clear how to interpret them
+            self.mark_all_as(cl_indexes, HeaderSafetyTier::NonCompliant);
+            true
+        } else {
+            false
         }
     }
 
