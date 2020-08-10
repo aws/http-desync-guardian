@@ -34,12 +34,12 @@ Priorities
 * **Uniformity across services is key.** This means request classification, logging, and metrics must happen under the hood and with minimally available settings (e.g., such as log file destination).
 * **Focus on reviewability.** The test suite must require no knowledge about the library/programming languages but only about HTTP protocol. So it's easy to review, contribute, and re-use.
 * **Security is efficient when it's easy for users.** Our goal is to make integration of the library as simple as possible.
-* **Ultralight.** The overhead must be minimal and impose no tangible tax on request handling.
+* **Ultralight.** The overhead must be minimal and impose no tangible tax on request handling (see [benchmarks](./benches)).
 
 Supported HTTP versions
 ======
 
-The main focus of this library is `HTTP/1.1`. See [tests](./tests)) for all covered cases. Predecessors of `HTTP/1.1` don't support connection re-use which limits opportunities for HTTP Desync,
+The main focus of this library is `HTTP/1.1`. See [tests](./tests) for all covered cases. Predecessors of `HTTP/1.1` don't support connection re-use which limits opportunities for HTTP Desync,
 however some proxies may upgrade such requests to `HTTP/1.1` and re-use backend connections, which may allow to craft malicious `HTTP/1.0` requests. 
 That's why they are analyzed using the same criteria as `HTTP/1.1`. For other protocol versions have the following exceptions:
 
