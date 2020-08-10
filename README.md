@@ -6,7 +6,26 @@
 Overview
 ========
 
-`http_desync_guardian` library is designed to analyze HTTP requests to prevent HTTP Desync attacks.
+`HTTP/1.1` went through a long evolution since 1991 to 2014:
+
+* [HTTP/0.9](https://www.w3.org/Protocols/HTTP/AsImplemented.html) – 1991
+* [HTTP/1.0](https://tools.ietf.org/html/rfc1945) – 1996
+* HTTP/1.1
+  * [RFC 2068](https://tools.ietf.org/html/rfc2068) – 1997
+  * [RFC 2616](https://tools.ietf.org/html/rfc2616) - 1999
+  * [RFC 7230](https://tools.ietf.org/html/rfc7230) - 2014
+
+This means there is a variety of servers and clients, which might have different views on request boundaries, creating opportunities for desynchronization attacks (a.k.a. HTTP Desync). 	 
+  
+It might seem simple to follow the latest RFC recommendations. However, for large scale systems that have been there for a while, it may come with unacceptable availability impact.	 
+  
+`http_desync_guardian` library is designed to analyze HTTP requests to prevent HTTP Desync attacks, balancing security and availability. 	 
+  
+It classifies requests into different [categories](/docs#request-classification) and provides recommendations on how each tier should be handled.
+
+`http_desync_guardian` library is designed to analyze HTTP requests to prevent HTTP Desync attacks, balancing security and availability. 
+It classifies request into different [categories](/docs#request-classification) and provides recommendations on how each tier should be handled.
+
 It can be used to either for raw HTTP request headers or already parsed by an HTTP engine.
 Consumers may configure logging and metrics collection.
 Logging is rate limited and all user data is obfuscated. 
