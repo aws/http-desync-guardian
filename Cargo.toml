@@ -1,6 +1,6 @@
 [package]
 name = "http_desync_guardian"
-version = "0.1.2"
+version = "0.1.3"
 authors = ["Eugene Retunsky <retunsky@gmail.com>"]
 edition = "2018"
 publish = true
