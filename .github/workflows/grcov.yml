@@ -32,6 +32,8 @@ jobs:
       - name: Gather coverage data
         id: coverage
         uses: actions-rs/grcov@v0.1
+        with:
+          args: -s ./src -t lcov --llvm --branch --ignore-not-existing
 
       - name: Pre-installing rust-covfix
         uses: actions-rs/install@v0.1
