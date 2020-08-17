@@ -41,9 +41,11 @@ jobs:
 
       - name: Clean coverage data
         id: clean
-        uses: Kogia-sima/rust-covfix@stable
+        uses: actions-rs/install@v0.1
         with:
-          args: ${{ steps.coverage.outputs.report }} -o ${{ steps.coverage.outputs.report }}
+          crate: rust-covfix
+          run: cargo rust-covfix
+          args: ${{ steps.coverage.outputs.report }} -o ${{ steps.coverage.outputs.report }}          
 
       - name: Coveralls upload
         uses: coverallsapp/github-action@master
