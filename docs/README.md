@@ -13,14 +13,16 @@ This page contains request classification tiers and reasons as well as mitigatio
 
 ### Recommended `http_desync_guardian` Modes
 
-| Classification | Defensive mode | Strictest mode |
-|----------------|----------------|----------------|
-| Compliant      | Allowed        | Allowed        |
-| Acceptable     | Allowed        | Blocked        |
-| Ambiguous      | Allowed¹       | Blocked        |
-| Severe         | Blocked        | Blocked        |
+| Classification | Defensive mode | Strictest mode | Monitoring mode |
+|----------------|----------------|----------------|-----------------|
+| Compliant      | Allowed        | Allowed        | Allowed²        |
+| Acceptable     | Allowed        | Blocked        | Allowed²        |
+| Ambiguous      | Allowed¹       | Blocked        | Allowed²        |
+| Severe         | Blocked        | Blocked        | Allowed²        |
 
 ¹ Route the requests but closes the client and target connections.
+
+² Only metrics are reported to assess potential availability impact
 
 For `Blocked` requests the client connection must be closed.
 
