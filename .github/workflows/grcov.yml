@@ -41,7 +41,7 @@ jobs:
 
       - name: Clean coverage data
         id: clean
-        uses: actions/rust-covfix@v0.2
+        uses: Kogia-sima/rust-covfix@stable
         with:
           args: ${{ steps.coverage.outputs.report }} -o ${{ steps.coverage.outputs.report }}
 
