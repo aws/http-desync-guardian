@@ -2,7 +2,12 @@
 
 [![Apache 2 License](https://img.shields.io/github/license/awslabs/s2n.svg)](http://aws.amazon.com/apache-2-0/)
 [![Crate](https://img.shields.io/crates/v/http_desync_guardian.svg)](https://crates.io/crates/http_desync_guardian)
+[![Minimum rustc version](https://img.shields.io/badge/rustc-1.22+-lightgray.svg)](https://github.com/rust-random/rand#rust-version-requirements)
+![Clippy check](https://github.com/aws/http-desync-guardian/workflows/Clippy%20check/badge.svg)
 ![Tests](https://github.com/aws/http-desync-guardian/workflows/Tests/badge.svg)
+[![Coverage Status](https://coveralls.io/repos/github/aws/http-desync-guardian/badge.svg?branch=master)](https://coveralls.io/github/aws/http-desync-guardian?branch=master)
+
+
 
 Overview
 ========
