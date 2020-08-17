@@ -1,5 +1,5 @@
 on: [push, pull_request]
-name: Clippy check
+name: Clippy/Fmt
 jobs:
   clippy:
     name: Clippy
