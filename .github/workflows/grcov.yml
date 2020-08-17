@@ -41,10 +41,9 @@ jobs:
 
       - name: Fix coverage data
         id: fix-coverage
-        uses: actions-rs/install@v0.1
+        uses: actions-rs/cargo@v1
         with:
-          crate: rust-covfix
-          run: cargo rust-covfix
+          command: rust-covfix
           args: ${{ steps.coverage.outputs.report }} -o ${{ steps.coverage.outputs.report }}-fixed          
 
       - name: Coveralls upload
