@@ -24,6 +24,8 @@ This page contains request classification tiers and reasons as well as mitigatio
 
 For `Blocked` requests the client connection must be closed.
 
+If you are concerned about potential impact, _Monitoring mode_ offers a metrics-only approach to assess prior to switching.
+
 ### Classification Reasons
 
 * `Compliant`
