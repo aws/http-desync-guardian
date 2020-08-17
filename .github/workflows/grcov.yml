@@ -29,22 +29,21 @@ jobs:
           CARGO_INCREMENTAL: 0
           RUSTFLAGS: "-Zprofile -Ccodegen-units=1 -Cinline-threshold=0 -Clink-dead-code -Coverflow-checks=off -Cpanic=abort -Zpanic_abort_tests"
 
-      # Note that `actions-rs/grcov` Action can install `grcov` too,
-      # but can't use faster installation methods yet.
-      # As a temporary experiment `actions-rs/install` Action plugged in here.
-      # Consider **NOT** to copy that into your workflow,
-      # but use `actions-rs/grcov` only
-      - name: Pre-installing grcov
+      - name: Pre-installing rust-covfix
         uses: actions-rs/install@v0.1
         with:
-          crate: grcov
+          crate: rust-covfix
           use-tool-cache: true
 
       - name: Gather coverage data
         id: coverage
         uses: actions-rs/grcov@v0.1
+
+      - name: Clean coverage data
+        id: clean
+        uses: actions-rs/rust-covfix@v0.2
         with:
-          coveralls-token: ${{ secrets.COVERALLS_TOKEN }}
+          args: ${{ steps.coverage.outputs.report }} -o ${{ steps.coverage.outputs.report }}
 
       - name: Coveralls upload
         uses: coverallsapp/github-action@master
