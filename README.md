@@ -105,7 +105,7 @@ See [benchmarks](./benches/benchmarks.rs) as an example of usage from Rust.
 
 ## Security issue notifications
 
-If you discover a potential security issue in `http_desync_gardian` we ask that you notify
+If you discover a potential security issue in `http_desync_guardian` we ask that you notify
 AWS Security via our [vulnerability reporting page](http://aws.amazon.com/security/vulnerability-reporting/). Please do **not** create a public github issue. 
 
 ## Security
