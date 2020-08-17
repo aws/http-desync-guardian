@@ -33,8 +33,14 @@ jobs:
         id: coverage
         uses: actions-rs/grcov@v0.1
 
-      - name: Clean coverage data
-        id: clean
+      - name: Pre-installing rust-covfix
+        uses: actions-rs/install@v0.1
+        with:
+          crate: rust-covfix
+          use-tool-cache: true
+
+      - name: Fix coverage data
+        id: fix-coverage
         uses: actions-rs/install@v0.1
         with:
           crate: rust-covfix
