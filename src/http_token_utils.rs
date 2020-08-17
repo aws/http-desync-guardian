@@ -98,7 +98,7 @@ const VALID_TE: &[HttpToken] = &[
 #[derive(PartialOrd, PartialEq, Debug)]
 pub enum TokenSimilarity {
     /// If two token are identical, i.e. equal ignoring case.
-    /// ```rust
+    /// ```no_run
     /// use http_desync_guardian::http_token_utils::*;
     /// use http_desync_guardian::http_token_utils::TokenSimilarity::*;
     ///
@@ -107,7 +107,7 @@ pub enum TokenSimilarity {
     /// ```
     Identical,
     /// If two tokens differ only by non-letter characters.
-    /// ```rust
+    /// ```no_run
     /// use http_desync_guardian::http_token_utils::*;
     /// use http_desync_guardian::http_token_utils::TokenSimilarity::*;
     ///
@@ -116,7 +116,7 @@ pub enum TokenSimilarity {
     /// ```
     SameLetters,
     /// Otherwise it's `Distant`. E.g. "some-token" and "other-token"
-    /// ```rust
+    /// ```no_run
     /// use http_desync_guardian::http_token_utils::*;
     /// use http_desync_guardian::http_token_utils::TokenSimilarity::*;
     ///
