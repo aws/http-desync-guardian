@@ -55,7 +55,8 @@ impl UltraLightRateLimiter {
         }
     }
 
-    #[inline]
+    #[cfg_attr(feature = "coverage", inline(never))]
+    #[cfg_attr(not(feature = "coverage"), inline(always))]
     pub fn try_acquire_value<T>(&self, value: T) -> Option<T> {
         if self.try_acquire() {
             Some(value)

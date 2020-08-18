@@ -5,3 +5,5 @@ ignore-dir: "/*"
 ignore-not-existing: true
 ignore: "/*"
 llvm: true
+excl-start: begin-ignore-line
+excl-stop: end-ignore-line
