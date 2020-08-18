@@ -41,14 +41,15 @@ jobs:
 
       - name: Fix coverage data
         id: fix-coverage
-        run: rust-covfix lcov.info -o fixed-lcov.info
+        continue-on-error: true
+        run: rust-covfix lcov.info -o lcov.info
 
       - name: Coveralls upload
         uses: coverallsapp/github-action@master
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           parallel: true
-          path-to-lcov: fixed-lcov.info
+          path-to-lcov: lcov.info
 
   grcov_finalize:
     runs-on: ubuntu-latest
