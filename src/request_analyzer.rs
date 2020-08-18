@@ -913,6 +913,8 @@ impl<'a> HttpHeader<'a> {
     /// # Parameters
     /// `name` - header name
     /// `value` - header value
+    #[cfg_attr(feature = "coverage", inline(never))]
+    #[cfg_attr(not(feature = "coverage"), inline(always))]
     pub fn new(name: HttpToken<'a>, value: HttpToken<'a>) -> Self {
         Self {
             name,
@@ -922,6 +924,8 @@ impl<'a> HttpHeader<'a> {
         }
     }
 
+    #[cfg_attr(feature = "coverage", inline(never))]
+    #[cfg_attr(not(feature = "coverage"), inline(always))]
     pub fn get_tier(&self) -> HeaderSafetyTier {
         self.tier
     }
@@ -987,6 +991,7 @@ impl Display for RequestAnalysisResult {
 }
 
 impl<'a> Display for RequestAnalysisState<'a> {
+    #[cfg_attr(feature = "coverage", inline(never))]
     fn fmt(&self, f: &mut Formatter<'_>) -> Result<(), Error> {
         if let Some(error_message) = self.error_message.as_ref() {
             write!(f, "{:?}: {}", self.tier, error_message,)

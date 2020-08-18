@@ -74,6 +74,7 @@ impl<T> AtomicSettings<T> {
 
     /// Sets the value if it was not set before.
     #[cfg(not(test))]
+    // cov: begin-ignore-line
     pub fn store(&self, new_value: T) -> Result<(), &str> {
         // we allow the value to be set only once in production
         // to avoid dealing with race conditions during swaps
@@ -94,6 +95,7 @@ impl<T> AtomicSettings<T> {
             Err("Can be set only once.")
         }
     }
+    // cov: end-ignore-line
 }
 
 lazy_static! {
@@ -164,12 +166,16 @@ pub trait CounterType {
 }
 
 impl CounterType for RequestSafetyTier {
+    #[cfg_attr(feature = "coverage", inline(never))]
+    #[cfg_attr(not(feature = "coverage"), inline(always))]
     fn get_counter_type(result: &RequestAnalysisResult) -> Self {
         result.tier
     }
 }
 
 impl CounterType for ClassificationReason {
+    #[cfg_attr(feature = "coverage", inline(never))]
+    #[cfg_attr(not(feature = "coverage"), inline(always))]
     fn get_counter_type(result: &RequestAnalysisResult) -> Self {
         result.reason
     }
@@ -426,6 +432,7 @@ static LAST_TIME: AtomicU64 = AtomicU64::new(0);
 static SKIPS: AtomicU64 = AtomicU64::new(0);
 
 #[cfg(not(test))]
+// cov: begin-ignore-line
 fn get_current_time_millis() -> u64 {
     let start_time = *START_TIME;
     let x = SKIPS.fetch_add(1, Ordering::Relaxed);
@@ -442,6 +449,7 @@ fn get_current_time_millis() -> u64 {
         LAST_TIME.load(Ordering::Relaxed)
     }
 }
+// cov: end-ignore-line
 
 #[cfg(test)]
 fn get_current_time_millis() -> u64 {

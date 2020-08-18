@@ -28,7 +28,8 @@ pub struct RequestBuffer<'a> {
 }
 
 impl<'a> RequestBuffer<'a> {
-    #[inline]
+    #[cfg_attr(feature = "coverage", inline(never))]
+    #[cfg_attr(not(feature = "coverage"), inline(always))]
     pub fn new(buf: HttpToken<'a>) -> Self {
         Self {
             buf,
@@ -37,7 +38,8 @@ impl<'a> RequestBuffer<'a> {
         }
     }
 
-    #[inline]
+    #[cfg_attr(feature = "coverage", inline(never))]
+    #[cfg_attr(not(feature = "coverage"), inline(always))]
     fn slice(&self, token_begin: usize, token_end: usize) -> Self {
         Self {
             buf: self.buf,
@@ -47,27 +49,31 @@ impl<'a> RequestBuffer<'a> {
     }
 
     /// If there is nothing left to process.
-    #[inline]
+    #[cfg_attr(feature = "coverage", inline(never))]
+    #[cfg_attr(not(feature = "coverage"), inline(always))]
     pub fn is_done(&self) -> bool {
         self.pos >= self.end
     }
 
     /// If it had less characters than expected.
     /// E.g. an expected delimiter was not there.
-    #[inline]
+    #[cfg_attr(feature = "coverage", inline(never))]
+    #[cfg_attr(not(feature = "coverage"), inline(always))]
     pub fn is_partial(&self) -> bool {
         self.pos > self.end
     }
 
     /// If the first character an RFC whitespace (SP|HT).
-    #[inline]
+    #[cfg_attr(feature = "coverage", inline(never))]
+    #[cfg_attr(not(feature = "coverage"), inline(always))]
     pub fn starts_with_rfc_whitespace(&self) -> bool {
         debug_assert!(self.pos < self.end);
         is_rfc_whitespace(self.buf[self.pos])
     }
 
     /// Converts it to an HttpToken.
-    #[inline]
+    #[cfg_attr(feature = "coverage", inline(never))]
+    #[cfg_attr(not(feature = "coverage"), inline(always))]
     pub fn as_http_token(&self) -> HttpToken<'a> {
         if self.pos < self.end {
             &self.buf[self.pos..self.end]
@@ -78,7 +84,8 @@ impl<'a> RequestBuffer<'a> {
 
     /// If the line was terminated with CRLF (true) or just LF (false).
     /// Also trims CR if it was there. (LF is already pre-trimmed).
-    #[inline]
+    #[cfg_attr(feature = "coverage", inline(never))]
+    #[cfg_attr(not(feature = "coverage"), inline(always))]
     pub fn trim_last_cr(&mut self) -> bool {
         if self.end > self.pos && self.buf[self.end - 1] == CR {
             self.end -= 1;
@@ -90,7 +97,8 @@ impl<'a> RequestBuffer<'a> {
 
     /// Take the next token till the delimiter.
     /// The delimiter is not included.
-    #[inline]
+    #[cfg_attr(feature = "coverage", inline(never))]
+    #[cfg_attr(not(feature = "coverage"), inline(always))]
     pub fn next_token(&mut self, delimiter: u8) -> Self {
         let mut current = self.pos;
         while current < self.end && self.buf[current] != delimiter {

@@ -39,3 +39,7 @@ opt-level = 0
 [profile.release]
 opt-level = 3
 
+[features]
+# Introduce to avoid inlining methods during coverage calculation.
+coverage = []
+

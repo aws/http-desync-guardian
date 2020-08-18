@@ -1,4 +1,12 @@
 output-type: lcov
 output-path: ./lcov.info
 source-dir: ./src
-ignore-dir: "/*"
+ignore-dir:
+  - "../"
+ignore:
+  - "*smallvec*"
+  - "*lazy_static*"
+ignore-not-existing: true
+llvm: true
+excl-start: (.*)begin-ignore-line(.*)
+excl-stop: (.*)end-ignore-line(.*)
