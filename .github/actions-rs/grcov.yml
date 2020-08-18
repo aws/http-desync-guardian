@@ -1,0 +1,4 @@
+output-type: lcov
+output-path: ./lcov.info
+source-dir: ./src
+ignore-dir: "/*"
