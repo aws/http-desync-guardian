@@ -27,22 +27,22 @@ jobs:
           args: --all
         env:
           CARGO_INCREMENTAL: 0
-          RUSTFLAGS: "-Zprofile -Ccodegen-units=1 -Cinline-threshold=0 -Clink-dead-code -Coverflow-checks=off -Cpanic=abort -Zpanic_abort_tests"
+          RUSTFLAGS: "-Zprofile -Ccodegen-units=1 -Cinline-threshold=0 -Clink-dead-code -Coverflow-checks=off -Cpanic=abort -Zpanic_abort_tests -Zno-landing-pads"
 
       - name: Gather coverage data
         id: coverage
         uses: actions-rs/grcov@v0.1
 
-      - name: Pre-installing rust-covfix
-        uses: actions-rs/install@v0.1
-        with:
-          crate: rust-covfix
-          use-tool-cache: true
+#       - name: Pre-installing rust-covfix
+#         uses: actions-rs/install@v0.1
+#         with:
+#           crate: rust-covfix
+#           use-tool-cache: true
 
-      - name: Fix coverage data
-        id: fix-coverage
-        continue-on-error: true
-        run: rust-covfix lcov.info -o lcov.info
+#       - name: Fix coverage data
+#         id: fix-coverage
+#         continue-on-error: true
+#         run: rust-covfix lcov.info -o lcov.info
 
       - name: Coveralls upload
         uses: coverallsapp/github-action@master
