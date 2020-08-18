@@ -1,9 +1,11 @@
 output-type: lcov
 output-path: ./lcov.info
 source-dir: ./src
-ignore-dir: "/*"
+ignore-dir:
+  - "../"
 ignore-not-existing: true
-ignore: "/*"
 llvm: true
 excl-start: begin-ignore-line
 excl-stop: end-ignore-line
+excl-br-start: begin-ignore-line
+excl-br-stop: end-ignore-line
