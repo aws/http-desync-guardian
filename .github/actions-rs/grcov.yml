@@ -8,5 +8,5 @@ ignore:
   - "*lazy_static*"
 ignore-not-existing: true
 llvm: true
-excl-start: (.*)begin-ignore-line(.*)
+excl-start: ((.*)begin-ignore-line(.*))|(^mod tests \{$)
 excl-stop: (.*)end-ignore-line(.*)
