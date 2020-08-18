@@ -162,8 +162,6 @@ where
 }
 
 pub trait CounterType {
-    #[cfg_attr(feature = "coverage", inline(never))]
-    #[cfg_attr(not(feature = "coverage"), inline(always))]
     fn get_counter_type(result: &RequestAnalysisResult) -> Self;
 }
 

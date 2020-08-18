@@ -2,3 +2,6 @@ output-type: lcov
 output-path: ./lcov.info
 source-dir: ./src
 ignore-dir: "/*"
+ignore-not-existing: true
+ignore: "/*"
+llvm: true
