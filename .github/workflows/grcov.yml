@@ -32,8 +32,6 @@ jobs:
       - name: Gather coverage data
         id: coverage
         uses: actions-rs/grcov@v0.1
-        with:
-          args: -s ./src -t lcov --llvm --branch --ignore-not-existing
 
       - name: Pre-installing rust-covfix
         uses: actions-rs/install@v0.1
@@ -43,14 +41,14 @@ jobs:
 
       - name: Fix coverage data
         id: fix-coverage
-        run: rust-covfix ${{ steps.coverage.outputs.report }} -o ${{ steps.coverage.outputs.report }}-fixed
+        run: rust-covfix lcov.info -o fixed-lcov.info
 
       - name: Coveralls upload
         uses: coverallsapp/github-action@master
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           parallel: true
-          path-to-lcov: ${{ steps.coverage.outputs.report }}-fixed
+          path-to-lcov: fixed-lcov.info
 
   grcov_finalize:
     runs-on: ubuntu-latest
