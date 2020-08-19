@@ -20,7 +20,6 @@
 #include <time.h>
 #include "defs.h"
 #include "http_desync_guardian.h"
-#include "http_desync_guardian_macros.h"
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wpointer-sign"
@@ -140,17 +139,6 @@ void initialize_http_desync_guardian()
             .callback = log_tier_metrics
     };
     http_desync_guardian_register_tier_metrics_callback(&tier_metrics_settings);
-
-    // initialize metrics
-    // query logging metrics internally set their own granular metrics settings
-    // if the granular metrics (Tier metrics in this case) have already been set
-    // then this call will not change the callback
-    http_desync_guardian_metrics_settings_t metrics_settings = {
-            .program = HDG_STRING("ProxyServiceFoo"),
-            .marketplace = HDG_STRING("BAR"),
-            .callback = log_metrics
-    };
-    http_desync_guardian_initialize_metrics_settings(&metrics_settings);
 
     // initialize logger
     http_desync_guardian_logging_settings_t logging_settings = {
