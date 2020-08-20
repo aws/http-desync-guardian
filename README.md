@@ -4,7 +4,7 @@
 [![Crate](https://img.shields.io/crates/v/http_desync_guardian.svg)](https://crates.io/crates/http_desync_guardian)
 ![Clippy/Fmt](https://github.com/aws/http-desync-guardian/workflows/Clippy/Fmt/badge.svg)
 ![Tests](https://github.com/aws/http-desync-guardian/workflows/Tests/badge.svg)
-[![Coverage Status](https://coveralls.io/repos/github/aws/http-desync-guardian/badge.svg?branch=master&_=1)](https://coveralls.io/github/aws/http-desync-guardian?branch=master&_=1)
+[![Coverage Status](https://coveralls.io/repos/github/aws/http-desync-guardian/badge.svg?branch=master)](https://coveralls.io/github/aws/http-desync-guardian?branch=master)
 
 
 
