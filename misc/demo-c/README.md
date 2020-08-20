@@ -3,6 +3,27 @@ Overview
 
 This directory contains examples of using `http_desync_guardian` library from C.
 
+Running demo examples
+=====================
+
+```bash
+git clone https://github.com/aws/http-desync-guardian.git
+cd ./http-desync-guardian
+cargo build --release
+cargo install --force cbindgen
+cbindgen --output ./misc/demo-c/http_desync_guardian.h --lang c
+cd ./misc/demo-c/
+gcc -o analyze_parsed_request analyze_parsed_request.c ../../target/release/libhttp_desync_guardian.so
+gcc -o analyze_raw_request analyze_raw_request.c ../../target/release/libhttp_desync_guardian.so
+```
+
+Then running `./analyze_raw_request` or `./analyze_parsed_request` should output something like:
+
+```
+- $ ./analyze_raw_request
+Request is Ambiguous: "PUT", Ambiguous:  BothTeClPresent "Content-Length": " 10", tier: Bad
+```
+
 Benchmarks
 ==========
 
