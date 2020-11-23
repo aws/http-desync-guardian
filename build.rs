@@ -67,7 +67,7 @@ fn is_rfc_tchar(b: u8) -> bool {
 }
 
 fn is_rfc_vchar(b: u8) -> bool {
-    b >= SP && b < DEL
+    (SP..DEL).contains(&b)
 }
 
 fn is_rfc_obs_text(b: u8) -> bool {
