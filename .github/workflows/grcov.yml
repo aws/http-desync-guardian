@@ -41,7 +41,6 @@ jobs:
 
       - name: Fix coverage data
         id: fix-coverage
-        continue-on-error: true
         run: rust-covfix lcov.info -o lcov.info
 
       - name: Coveralls upload
