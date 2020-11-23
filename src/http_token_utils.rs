@@ -242,7 +242,7 @@ pub fn obfuscate_value(raw_data: HttpToken) -> String {
             b'\n' => str.push_str("\\n"),
             b'\t' => str.push_str("\\t"),
             b'\\' => str.push_str("\\\\"),
-            b' ' => str.push_str(" "),
+            b' ' => str.push(' '),
             _ if !is_rfc_vchar(*b) && !is_rfc_obs_text(*b) => {
                 write!(str, "\\{:#04x}", *b).expect("Writing to strings is infallible");
             }
