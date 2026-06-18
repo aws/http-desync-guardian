@@ -324,6 +324,48 @@
     required_message_items:
       - "Transfer-Encoding"
 
+- name: 'Transfer-Encoding[white-space] with a printable character'
+  uri: /foo/bar
+  method: POST
+  version: HTTP/1.1
+  headers:
+    - name: "Transfer-Encoding x"
+      value: chunked
+      tier: NonCompliant
+  expected:
+    tier: Ambiguous
+    reason: SuspiciousHeader
+    required_message_items:
+      - "Transfer-Encoding"
+
+- name: 'transfer-encoding[white-space] with printable characters'
+  uri: /foo/bar
+  method: POST
+  version: HTTP/1.1
+  headers:
+    - name: "transfer-encoding XY"
+      value: chunked
+      tier: NonCompliant
+  expected:
+    tier: Ambiguous
+    reason: SuspiciousHeader
+    required_message_items:
+      - "Transfer-Encoding"
+
+- name: 'Transfer-Encoding[white-space] with a non-printable character'
+  uri: /foo/bar
+  method: POST
+  version: HTTP/1.1
+  headers:
+    - name: "Transfer-Encoding \x01"
+      value: chunked
+      tier: NonCompliant
+  expected:
+    tier: Ambiguous
+    reason: SuspiciousHeader
+    required_message_items:
+      - "Transfer-Encoding"
+
 - name: 'Empty header name'
   uri: /foo/bar
   method: POST

@@ -46,6 +46,7 @@ fn generate_table(name: &str, predicate: fn(u8) -> bool) -> String {
     use std::fmt::Write;
 
     let mut t = String::new();
+    write!(t, "#[rustfmt::skip]\r\n").ok();
     write!(t, "pub static {}: [bool; 256] = [\r\n    ", name).ok();
     for i in 0..=255_u8 {
         write!(t, " {} /* {} */,", (predicate)(i), format_char(i)).ok();
