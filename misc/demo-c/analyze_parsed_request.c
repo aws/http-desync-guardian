@@ -38,29 +38,29 @@ void analyze_request(http_desync_guardian_request_t *request_data)
     http_desync_guardian_verdict_t verdict = {0};
     http_desync_guardian_analyze_request(request_data, &verdict);
 
-    if (verdict.tier > REQUEST_SAFETY_TIER_COMPLIANT && client_prefers_to_debug_request_data) {
+    if (verdict.tier > HTTP_DESYNC_GUARDIAN_REQUEST_SAFETY_TIER_T_COMPLIANT && client_prefers_to_debug_request_data) {
         char buffer[4096];
         int request_data_length = http_desync_guardian_print_request(request_data, sizeof(buffer), buffer);
         printf("Non-compliant request:\n%.*s\n", request_data_length, buffer);
     }
 
     switch (verdict.tier) {
-        case REQUEST_SAFETY_TIER_COMPLIANT:
+        case HTTP_DESYNC_GUARDIAN_REQUEST_SAFETY_TIER_T_COMPLIANT:
             // the request is good. green light
             printf("Request is OK\n");
             break;
-        case REQUEST_SAFETY_TIER_ACCEPTABLE:
+        case HTTP_DESYNC_GUARDIAN_REQUEST_SAFETY_TIER_T_ACCEPTABLE:
             // the request is acceptable, as Transfer-Encoding and Content-Length are good. green light
             printf("Request is OK-ish\n");
             break;
-        case REQUEST_SAFETY_TIER_AMBIGUOUS:
+        case HTTP_DESYNC_GUARDIAN_REQUEST_SAFETY_TIER_T_AMBIGUOUS:
             // the request is suspicious. you can send it, but close both FE/BE connections immediately
             printf("Request is Ambiguous: %.*s\n", verdict.message_length, verdict.message_data);
             if (client_prefers_to_send_ambiguous_requests) {
                 check_headers(request_data);
             }
             break;
-        case REQUEST_SAFETY_TIER_SEVERE:
+        case HTTP_DESYNC_GUARDIAN_REQUEST_SAFETY_TIER_T_SEVERE:
             // send 400 and close the connection
             printf("Request is BAD: %.*s\n", verdict.message_length, verdict.message_data);
             break;
@@ -73,7 +73,7 @@ void analyze_request(http_desync_guardian_request_t *request_data)
 /* Demo callback for logging. */
 void log_message(http_desync_guardian_request_safety_tier_t tier, uint32_t len, const uint8_t *msg)
 {
-    if (tier >= REQUEST_SAFETY_TIER_AMBIGUOUS) {
+    if (tier >= HTTP_DESYNC_GUARDIAN_REQUEST_SAFETY_TIER_T_AMBIGUOUS) {
         // call apps' log. e.g. LOGGER(WARN, "%.*s", len, msg);
     }
 }
@@ -96,19 +96,19 @@ void log_tier_metrics(uint32_t len, const http_desync_guardian_tier_count_t *tie
 
         char tier[15];
         switch (tier_metrics_list[i].counter_type) {
-            case REQUEST_SAFETY_TIER_COMPLIANT:
+            case HTTP_DESYNC_GUARDIAN_REQUEST_SAFETY_TIER_T_COMPLIANT:
                 // the request is good. green light
                 strcpy(tier, "Compliant");
                 break;
-            case REQUEST_SAFETY_TIER_ACCEPTABLE:
+            case HTTP_DESYNC_GUARDIAN_REQUEST_SAFETY_TIER_T_ACCEPTABLE:
                 // the request is acceptable, as Transfer-Encoding and Content-Length are good. green light
                 strcpy(tier, "Acceptable");
                 break;
-            case REQUEST_SAFETY_TIER_AMBIGUOUS:
+            case HTTP_DESYNC_GUARDIAN_REQUEST_SAFETY_TIER_T_AMBIGUOUS:
                 // the request is suspicious. you can send it, but close both FE/BE connections immediately
                 strcpy(tier, "Ambiguous");
                 break;
-            case REQUEST_SAFETY_TIER_SEVERE:
+            case HTTP_DESYNC_GUARDIAN_REQUEST_SAFETY_TIER_T_SEVERE:
                 // send 400 and close the connection
                 strcpy(tier, "Severe");
                 break;
@@ -152,10 +152,10 @@ void check_headers(http_desync_guardian_request_t *request_data)
     for (int i = 0; i < request_data->headers.count; i++) {
         http_desync_guardian_header_safety_tier_t header_tier = request_data->headers.pairs[i].compliant;
         switch (header_tier) {
-            case HEADER_SAFETY_TIER_COMPLIANT:
+            case HTTP_DESYNC_GUARDIAN_HEADER_SAFETY_TIER_T_COMPLIANT:
                 // Green light.
                 break;
-            case HEADER_SAFETY_TIER_NON_COMPLIANT:
+            case HTTP_DESYNC_GUARDIAN_HEADER_SAFETY_TIER_T_NON_COMPLIANT:
                 // The header is not RFC compliant.
                 // Should be deleted if the customer chose STRICT mode.
                 // Yellow light.
@@ -165,7 +165,7 @@ void check_headers(http_desync_guardian_request_t *request_data)
                        request_data->headers.pairs[i].value.length,
                        request_data->headers.pairs[i].value.data_ptr);
                 break;
-            case HEADER_SAFETY_TIER_BAD:
+            case HTTP_DESYNC_GUARDIAN_HEADER_SAFETY_TIER_T_BAD:
                 // The header must be deleted.
                 // Read light.
                 printf("(!) Remove header \"%.*s\": \"%.*s\"\n",

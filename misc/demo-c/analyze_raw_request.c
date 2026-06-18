@@ -37,19 +37,19 @@ void analyze_raw_request()
     http_desync_guardian_analyze_raw_request(sizeof(request), request, &verdict);
 
     switch (verdict.tier) {
-        case REQUEST_SAFETY_TIER_COMPLIANT:
+        case HTTP_DESYNC_GUARDIAN_REQUEST_SAFETY_TIER_T_COMPLIANT:
             // the request is good. green light
             printf("Request is OK\n");
             break;
-        case REQUEST_SAFETY_TIER_ACCEPTABLE:
+        case HTTP_DESYNC_GUARDIAN_REQUEST_SAFETY_TIER_T_ACCEPTABLE:
             // the request is acceptable, as Transfer-Encoding and Content-Length are good. green light
             printf("Request is OK-ish\n");
             break;
-        case REQUEST_SAFETY_TIER_AMBIGUOUS:
+        case HTTP_DESYNC_GUARDIAN_REQUEST_SAFETY_TIER_T_AMBIGUOUS:
             // the request is suspicious. you can send it, but close both FE/BE connections immediately
             printf("Request is Ambiguous: %.*s\n", verdict.message_length, verdict.message_data);
             break;
-        case REQUEST_SAFETY_TIER_SEVERE:
+        case HTTP_DESYNC_GUARDIAN_REQUEST_SAFETY_TIER_T_SEVERE:
             // send 400 and close the connection
             printf("Request is BAD: %.*s\n", verdict.message_length, verdict.message_data);
             break;

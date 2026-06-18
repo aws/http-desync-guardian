@@ -59,19 +59,19 @@ static ngx_int_t http_desync_guardian_detect_construct_request(http_desync_guard
 
 http_desync_guardian_detect_enum_mapping_t http_desync_guardian_detect_tier_str[] = {
         {
-                .enum_value = REQUEST_SAFETY_TIER_COMPLIANT,
+                .enum_value = HTTP_DESYNC_GUARDIAN_REQUEST_SAFETY_TIER_T_COMPLIANT,
                 .str_value  = ngx_null_string,  //'-' for Compliant
         },
         {
-                .enum_value = REQUEST_SAFETY_TIER_ACCEPTABLE,
+                .enum_value = HTTP_DESYNC_GUARDIAN_REQUEST_SAFETY_TIER_T_ACCEPTABLE,
                 .str_value  = ngx_string("Acceptable"),
         },
         {
-                .enum_value = REQUEST_SAFETY_TIER_AMBIGUOUS,
+                .enum_value = HTTP_DESYNC_GUARDIAN_REQUEST_SAFETY_TIER_T_AMBIGUOUS,
                 .str_value  = ngx_string("Ambiguous"),
         },
         {
-                .enum_value = REQUEST_SAFETY_TIER_SEVERE,
+                .enum_value = HTTP_DESYNC_GUARDIAN_REQUEST_SAFETY_TIER_T_SEVERE,
                 .str_value  = ngx_string("Severe"),
         }
 };
