@@ -268,10 +268,10 @@
       value: 1000
       tier: Bad
   expected:
-    tier: Ambiguous
-    reason: SuspiciousHeader
+    tier: Severe
+    reason: SuspiciousTeClPresent
     required_message_items:
-      - "Transfer-Encoding"
+      - "Suspicious TE CL present"
 
 - name: '[white-space]Transfer-Encoding and Content-Length'
   uri: /foo/bar
@@ -285,10 +285,10 @@
       value: 1000
       tier: Bad
   expected:
-    tier: Ambiguous
-    reason: SuspiciousHeader
+    tier: Severe
+    reason: SuspiciousTeClPresent
     required_message_items:
-      - "Transfer-Encoding"
+      - "Suspicious TE CL present"
 
 - name: '[white-space]Transfer-Encoding and [white-space]Content-Length'
   uri: /foo/bar
@@ -302,10 +302,10 @@
       value: 1000
       tier: Bad
   expected:
-    tier: Ambiguous
-    reason: SuspiciousHeader
+    tier: Severe
+    reason: SuspiciousTeClPresent
     required_message_items:
-      - "Transfer-Encoding"
+      - "Suspicious TE CL present"
 
 - name: 'Transfer-Encoding[white-space] and Content-Length[white-space]'
   uri: /foo/bar
@@ -319,10 +319,10 @@
       value: 1000
       tier: Bad
   expected:
-    tier: Ambiguous
-    reason: SuspiciousHeader
+    tier: Severe
+    reason: SuspiciousTeClPresent
     required_message_items:
-      - "Transfer-Encoding"
+      - "Suspicious TE CL present"
 
 - name: 'Transfer-Encoding[white-space] with a printable character'
   uri: /foo/bar

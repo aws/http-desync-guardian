@@ -342,8 +342,8 @@
       value: " 4"
       tier: Bad
   expected:
-    tier: Ambiguous
-    reason: SuspiciousHeader
+    tier: Severe
+    reason: SuspiciousTeClPresent
 - name: '\rTransfer-Encoding: chunked'
   uri: /test.html
   method: POST
