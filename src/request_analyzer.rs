@@ -471,7 +471,7 @@ impl<'a> HttpRequestData<'a> {
             // "Distant" similarity match will count when they share an ASCII
             // prefix match.
             let is_te_prefix = is_matching_prefix(TE, header.name);
-            let _is_cl_prefix = is_matching_prefix(CL, header.name);
+            let is_cl_prefix = is_matching_prefix(CL, header.name);
 
             let trimmed_name = rfc_whitespace_trim(header.name);
             if trimmed_name.is_empty() || is_colon(trimmed_name[0]) {
@@ -485,8 +485,7 @@ impl<'a> HttpRequestData<'a> {
                         suspicious_te_index = Some(idx);
                     }
                 }
-                if cl_similarity == SameLetters {
-                    // TODO - also check is_cl_prefix
+                if cl_similarity == SameLetters || is_cl_prefix {
                     header.tier = NonCompliant;
                     cl_indexes.push(idx);
                     if suspicious_cl_index.is_none() {
