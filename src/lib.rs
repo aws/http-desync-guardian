@@ -94,6 +94,7 @@ pub enum ClassificationReason {
     MissingLastEmptyLine,
     MissingHeaderColon,
     MissingUri,
+    SuspiciousTeClPresent,
 }
 
 /// A pointer to a string.

@@ -444,8 +444,13 @@ impl<'a> HttpRequestData<'a> {
             self.version = HTTP_0_9
         }
 
+        // vector to capture headers that are similar to Transfer-Encoding or Content-Length.
         let mut te_indexes: SmallVec<[usize; 8]> = SmallVec::new();
         let mut cl_indexes: SmallVec<[usize; 4]> = SmallVec::new();
+
+        let mut suspicious_te_index = None;
+        let mut suspicious_cl_index = None;
+        let mut empty_header_index = None;
 
         for (idx, header) in self.headers.iter_mut().enumerate() {
             let te_similarity = determine_similarity(TE, header.name);
@@ -471,42 +476,76 @@ impl<'a> HttpRequestData<'a> {
             let trimmed_name = rfc_whitespace_trim(header.name);
             if trimmed_name.is_empty() || is_colon(trimmed_name[0]) {
                 header.tier = Bad;
-                upgrade_verdict!(
-                    analysis_state,
-                    RequestSafetyTier::Ambiguous,
-                    ErrorMessage::from_header(ClassificationReason::EmptyHeader, header.clone())
-                );
+                empty_header_index = Some(idx);
             } else if !header.is_essential && header.tier != HeaderSafetyTier::Bad {
-                let suspicious_header = if te_similarity == SameLetters || is_te_prefix {
-                    te_indexes.push(idx);
-                    Some(TE)
-                } else if cl_similarity == SameLetters {
-                    // TODO - also check is_cl_prefix
-                    cl_indexes.push(idx);
-                    Some(CL)
-                } else {
-                    None
-                };
-                if let Some(important_header) = suspicious_header {
+                if te_similarity == SameLetters || is_te_prefix {
                     header.tier = NonCompliant;
-                    upgrade_verdict!(
-                        analysis_state,
-                        RequestSafetyTier::Ambiguous,
-                        ErrorMessage::from_message(
-                            ClassificationReason::SuspiciousHeader,
-                            format!(
-                                "{} too close to {}",
-                                header,
-                                to_quoted_ascii(important_header)
-                            ),
-                        )
-                    );
+                    te_indexes.push(idx);
+                    if suspicious_te_index.is_none() {
+                        suspicious_te_index = Some(idx);
+                    }
+                }
+                if cl_similarity == SameLetters {
+                    // TODO - also check is_cl_prefix
+                    header.tier = NonCompliant;
+                    cl_indexes.push(idx);
+                    if suspicious_cl_index.is_none() {
+                        suspicious_cl_index = Some(idx);
+                    }
                 }
             } else if te_similarity == Identical {
                 te_indexes.push(idx);
             } else if cl_similarity == Identical {
                 cl_indexes.push(idx);
             }
+        }
+
+        if (suspicious_cl_index.is_some() && !te_indexes.is_empty())
+            || (suspicious_te_index.is_some() && !cl_indexes.is_empty())
+        {
+            upgrade_verdict!(
+                analysis_state,
+                RequestSafetyTier::Severe,
+                ErrorMessage::from_message(
+                    ClassificationReason::SuspiciousTeClPresent,
+                    "Suspicious TE CL present".to_string(),
+                )
+            );
+        } else if let Some(cl_idx) = suspicious_cl_index {
+            upgrade_verdict!(
+                analysis_state,
+                RequestSafetyTier::Ambiguous,
+                ErrorMessage::from_message(
+                    ClassificationReason::SuspiciousHeader,
+                    format!(
+                        "{} too close to {}",
+                        self.headers[cl_idx],
+                        to_quoted_ascii(CL)
+                    ),
+                )
+            );
+        } else if let Some(te_idx) = suspicious_te_index {
+            upgrade_verdict!(
+                analysis_state,
+                RequestSafetyTier::Ambiguous,
+                ErrorMessage::from_message(
+                    ClassificationReason::SuspiciousHeader,
+                    format!(
+                        "{} too close to {}",
+                        self.headers[te_idx],
+                        to_quoted_ascii(TE)
+                    ),
+                )
+            );
+        } else if let Some(empty_idx) = empty_header_index {
+            upgrade_verdict!(
+                analysis_state,
+                RequestSafetyTier::Ambiguous,
+                ErrorMessage::from_header(
+                    ClassificationReason::EmptyHeader,
+                    self.headers[empty_idx].clone()
+                )
+            );
         }
 
         self.verify_te_cl_headers(&mut analysis_state, &te_indexes, &cl_indexes);
