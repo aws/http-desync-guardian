@@ -615,7 +615,15 @@ mod tests {
             &classification_metrics_settings,
         ));
 
-        analyze_vanilla_request();
+        // Retry to handle rate limiter contention from parallel tests.
+        // Each analyze_vanilla_request() call advances the synthetic test clock
+        // by 10s, moving to a new rate limiter time slot.
+        for _ in 0..3 {
+            analyze_vanilla_request();
+            if CLASSIFICATION_COUNT.load(Ordering::SeqCst) != 0 {
+                break;
+            }
+        }
 
         assert_ne!(CLASSIFICATION_COUNT.load(Ordering::SeqCst), 0);
     }
