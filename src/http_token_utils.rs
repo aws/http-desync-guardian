@@ -20,7 +20,7 @@ use std::fmt::Write;
 /// All operations are in-place and read only.
 pub type HttpToken<'a> = &'a [u8];
 
-pub const fn http_token(v: &str) -> HttpToken {
+pub const fn http_token(v: &str) -> HttpToken<'_> {
     v.as_bytes()
 }
 
@@ -53,7 +53,6 @@ pub const CL: HttpToken = http_token("content-length");
 /// transfer-extension = token *( OWS ";" OWS transfer-parameter )
 /// transfer-parameter = token BWS "=" BWS ( token / quoted-string )
 /// ```
-
 /// URL: https://tools.ietf.org/html/rfc3986#appendix-A
 /// ```ignore
 /// path          = path-abempty    ; begins with "/" or is empty
@@ -83,7 +82,6 @@ pub const CL: HttpToken = http_token("content-length");
 ///     pct-encoded = "%" HEXDIG HEXDIG
 ///     unreserved    = ALPHA / DIGIT / "-" / "." / "_" / "~"
 /// ```
-
 const SP: u8 = b' ';
 const COLON: u8 = b':';
 pub const CHUNKED: HttpToken = http_token("chunked");
@@ -137,6 +135,27 @@ pub fn is_valid_te(value: HttpToken) -> Option<HttpToken> {
         .iter()
         .copied()
         .find(|s| s.eq_ignore_ascii_case(te))
+}
+
+// Returns true when `prefix` is an ASCII prefix of `candidate`, ignoring ASCII case.
+pub fn is_matching_prefix(prefix: HttpToken, candidate: HttpToken) -> bool {
+    let trimmed_candidate = rfc_whitespace_trim(candidate);
+
+    if trimmed_candidate.is_empty() {
+        return false;
+    }
+
+    if prefix.len() > trimmed_candidate.len() {
+        return false;
+    }
+
+    for (idx, c) in prefix.iter().enumerate() {
+        if !c.eq_ignore_ascii_case(&trimmed_candidate[idx]) {
+            return false;
+        }
+    }
+
+    true
 }
 
 #[inline(always)]
@@ -264,7 +283,7 @@ pub fn is_rfc_whitespace(b: u8) -> bool {
     RFC_WHITE_SPACE[b as usize]
 }
 
-pub fn parse_num(value: HttpToken) -> Result<u64, &str> {
+pub fn parse_num(value: HttpToken<'_>) -> Result<u64, &str> {
     let trimmed = rfc_whitespace_trim(value);
     let mut result: u64 = 0;
     for c in trimmed.iter() {
@@ -505,6 +524,31 @@ mod tests {
             }
         }
         return (matched, checked);
+    }
+
+    #[test]
+    fn test_is_matching_prefix() {
+        let test_cases = vec![
+            (TE, "transfer-encoding", true),
+            (TE, "transfer-encoding ", true),
+            (TE, "transfer-encoding x", true),
+            (TE, " transfer-encoding", true),
+            (TE, " transfer-encoding ", true),
+            (TE, " transfer-encoding x", true),
+            (TE, "transfer-blah", false),
+            (TE, "", false),
+            (TE, "transfer-encodi", false),
+            (TE, "transfer-encodings", true),
+        ];
+
+        for (prefix, header, expected) in test_cases {
+            let result = is_matching_prefix(prefix, http_token(header));
+            assert_eq!(
+                result, expected,
+                "{:?}.starts_with({:?}) expected {}",
+                prefix, header, expected
+            );
+        }
     }
 
     #[test]

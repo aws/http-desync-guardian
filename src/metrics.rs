@@ -83,12 +83,13 @@ impl<T> AtomicSettings<T> {
         // value is set only if settings were originally null.
         if self
             .settings
-            .compare_and_swap(
+            .compare_exchange(
                 std::ptr::null_mut(),
                 Box::into_raw(Box::new(new_value)),
                 Ordering::Relaxed,
+                Ordering::Relaxed,
             )
-            .is_null()
+            .is_ok()
         {
             Ok(())
         } else {

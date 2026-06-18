@@ -123,15 +123,20 @@ impl<'a> HttpRequestData<'a> {
                 .headers
                 .to_slice()
                 .iter()
-                .map(|h| HttpHeader {
-                    name: h.name.as_http_token("header name"),
-                    value: h.value.as_http_token("header value"),
-                    tier: match h.compliant {
-                        HeaderSafetyTier::NonCompliant => HeaderSafetyTier::NonCompliant,
-                        HeaderSafetyTier::Bad => HeaderSafetyTier::Bad,
-                        _ => HeaderSafetyTier::Compliant,
-                    },
-                    is_essential: false,
+                .map(|h| {
+                    let tier = h.compliant as i32;
+                    HttpHeader {
+                        name: h.name.as_http_token("header name"),
+                        value: h.value.as_http_token("header value"),
+                        tier: if tier == HeaderSafetyTier::NonCompliant as i32 {
+                            HeaderSafetyTier::NonCompliant
+                        } else if tier == HeaderSafetyTier::Bad as i32 {
+                            HeaderSafetyTier::Bad
+                        } else {
+                            HeaderSafetyTier::Compliant
+                        },
+                        is_essential: false,
+                    }
                 })
                 .collect(),
         }
@@ -145,7 +150,7 @@ impl<'a> HttpRequestData<'a> {
     ///
     /// If during parsing errors were encountered, they
     /// are populated in the `RequestAnalysisState`
-    fn parse(buf: HttpToken<'a>) -> (Self, RequestAnalysisState) {
+    fn parse(buf: HttpToken<'a>) -> (Self, RequestAnalysisState<'a>) {
         let mut parse_state = RequestAnalysisState {
             tier: RequestSafetyTier::Compliant,
             reason: ClassificationReason::Compliant,
@@ -256,19 +261,17 @@ impl<'a> HttpRequestData<'a> {
                 multiline_header_name = Some(first_token);
             }
 
-            let (header_name, header_value) = if multi_line
-                && multiline_header_name.is_some()
-                && (media_type || header_line.is_partial())
-            {
-                // either we're in a context of a multiline header
-                // and the line doesn't mimic a header (i.e. doesn't have ':' in the value)
-                (
-                    multiline_header_name.expect("Code bug. It must be present in this branch"),
-                    first_token,
-                )
+            let (header_name, header_value) = if let Some(mh_name) = multiline_header_name {
+                if multi_line && (media_type || header_line.is_partial()) {
+                    // either we're in a context of a multiline header
+                    // and the line doesn't mimic a header (i.e. doesn't have ':' in the value)
+                    (mh_name, first_token)
+                } else {
+                    // or it's a regular header
+                    // or a multiline mimicking a regular header (i.e. " Content-Length: 10").
+                    (first_token, header_line.as_http_token())
+                }
             } else {
-                // or it's a regular header
-                // or a multiline mimicking a regular header (i.e. " Content-Length: 10").
                 (first_token, header_line.as_http_token())
             };
 
@@ -456,7 +459,14 @@ impl<'a> HttpRequestData<'a> {
             header.is_essential = te_similarity == Identical || cl_similarity == Identical;
 
             header.tier = header.header_tier();
-            analysis_state.upgrade_from_header_tier(&header);
+            analysis_state.upgrade_from_header_tier(header);
+
+            // Check for prefixed Transfer-Encoding, Content-Length with extra
+            // ASCII characters. For sensitive/framing headers, even a
+            // "Distant" similarity match will count when they share an ASCII
+            // prefix match.
+            let is_te_prefix = is_matching_prefix(TE, header.name);
+            let _is_cl_prefix = is_matching_prefix(CL, header.name);
 
             let trimmed_name = rfc_whitespace_trim(header.name);
             if trimmed_name.is_empty() || is_colon(trimmed_name[0]) {
@@ -467,10 +477,11 @@ impl<'a> HttpRequestData<'a> {
                     ErrorMessage::from_header(ClassificationReason::EmptyHeader, header.clone())
                 );
             } else if !header.is_essential && header.tier != HeaderSafetyTier::Bad {
-                let suspicious_header = if te_similarity == SameLetters {
+                let suspicious_header = if te_similarity == SameLetters || is_te_prefix {
                     te_indexes.push(idx);
                     Some(TE)
                 } else if cl_similarity == SameLetters {
+                    // TODO - also check is_cl_prefix
                     cl_indexes.push(idx);
                     Some(CL)
                 } else {
@@ -535,10 +546,10 @@ impl<'a> HttpRequestData<'a> {
     }
 
     fn emit_logs_and_metrics(&mut self, result: &RequestAnalysisResult) {
-        TIER_STATS.update_counters(&self, &result);
-        CLASSIFICATION_STATS.update_counters(&self, &result);
+        TIER_STATS.update_counters(self, result);
+        CLASSIFICATION_STATS.update_counters(self, result);
         if let Some(message) = &result.message {
-            LoggingSettings::log_message(result.tier, &message);
+            LoggingSettings::log_message(result.tier, message);
         }
     }
 
@@ -657,9 +668,9 @@ impl<'a> HttpRequestData<'a> {
             return;
         }
 
-        let has_te = self.has_transfer_encoding(result_tier, &te_indexes);
+        let has_te = self.has_transfer_encoding(result_tier, te_indexes);
 
-        let cl_value = self.extract_content_length(result_tier, &cl_indexes);
+        let cl_value = self.extract_content_length(result_tier, cl_indexes);
 
         if self.method_without_body() {
             self.check_te_for_get_head(result_tier, has_te, te_indexes);
@@ -767,7 +778,7 @@ impl<'a> HttpRequestData<'a> {
         debug_assert!(self.method_without_body());
 
         match cl_value {
-            Some(cl) if cl == 0 => {
+            Some(0) => {
                 upgrade_verdict!(
                     result_tier,
                     RequestSafetyTier::Acceptable,

@@ -164,6 +164,7 @@ where
 /// The return code indicates if settings were accepted,
 /// or it was a subsequent call.  
 #[repr(C)]
+#[allow(clippy::upper_case_acronyms)]
 pub enum SettingsReturnCode {
     ACCEPTED,
     REJECTED,
@@ -219,7 +220,7 @@ impl ExtString {
         }
     }
 
-    fn as_http_token(&self, name: &'static str) -> HttpToken {
+    fn as_http_token(&self, name: &'static str) -> HttpToken<'_> {
         assert!(
             self.length == 0 || !self.data_ptr.is_null(),
             "Bad {}: length is {}, but the pointer is NULL",
@@ -258,6 +259,7 @@ impl ExtHttpHeaders {
 /// # Arguments
 /// * `request` a pointer to request
 /// * `verdict` a pointer to verdict placeholder (being populated by this method)
+///
 /// Both arguments are being changed during execution of this method.
 /// # Safety
 /// As long as request is well-formed and verdict is a valid pointer.
@@ -277,7 +279,7 @@ impl ExtHttpHeaders {
 /// 2. Header count > 0, but the pointer is `NULL`
 /// 3. Any string has > 0 length, but the pointer is `NULL`
 #[no_mangle]
-pub extern "C" fn http_desync_guardian_analyze_request(
+pub extern "C-unwind" fn http_desync_guardian_analyze_request(
     request: Option<&mut ExtHttpRequestData>,
     verdict: Option<&mut ClassificationVerdict>,
 ) {
@@ -320,7 +322,7 @@ pub extern "C" fn http_desync_guardian_analyze_request(
 /// 1. `size` is `0`
 #[no_mangle]
 #[allow(clippy::not_unsafe_ptr_arg_deref)]
-pub extern "C" fn http_desync_guardian_analyze_raw_request(
+pub extern "C-unwind" fn http_desync_guardian_analyze_raw_request(
     size: u32,
     request_buffer: *const u8,
     verdict: Option<&mut ClassificationVerdict>,
@@ -369,6 +371,7 @@ fn populate_external_verdict(
 /// * `request` a pointer to request
 /// * `buffer_len` the size of the buffer
 /// * `buffer` a raw pointer to the buffer being written to
+///
 /// `request` and `buffer` are being changed during execution of this method.
 /// # Safety
 /// Request needs to be well-formed.
@@ -390,7 +393,7 @@ fn populate_external_verdict(
 /// 5. `buffer` is `NULL`
 #[no_mangle]
 #[allow(clippy::not_unsafe_ptr_arg_deref)]
-pub extern "C" fn http_desync_guardian_print_request(
+pub extern "C-unwind" fn http_desync_guardian_print_request(
     request: Option<&mut ExtHttpRequestData>,
     buffer_len: usize,
     buffer: *mut u8,
@@ -415,7 +418,7 @@ pub extern "C" fn http_desync_guardian_print_request(
 /// # Returns
 /// Either `ACCEPTED` for the first call or `REJECTED` for any subsequent ones.
 #[no_mangle]
-pub extern "C" fn http_desync_guardian_initialize_logging_settings(
+pub extern "C-unwind" fn http_desync_guardian_initialize_logging_settings(
     settings: Option<&ExtLoggingSettings>,
 ) -> SettingsReturnCode {
     match LoggingSettings::set(settings.expect("Settings can not be NULL")) {
@@ -430,7 +433,7 @@ pub extern "C" fn http_desync_guardian_initialize_logging_settings(
 /// # Returns
 /// Either `ACCEPTED` for the first call or `REJECTED` for any subsequent ones.
 #[no_mangle]
-pub extern "C" fn http_desync_guardian_register_tier_metrics_callback(
+pub extern "C-unwind" fn http_desync_guardian_register_tier_metrics_callback(
     settings: Option<&ExtTierMetricsSettings>,
 ) -> SettingsReturnCode {
     match TierMetricsSettings::set(settings.expect("Settings can not be NULL")) {
@@ -446,7 +449,7 @@ pub extern "C" fn http_desync_guardian_register_tier_metrics_callback(
 /// # Returns
 /// Either `ACCEPTED` for the first call or `REJECTED` for any subsequent ones.
 #[no_mangle]
-pub extern "C" fn http_desync_guardian_register_classification_metrics_callback(
+pub extern "C-unwind" fn http_desync_guardian_register_classification_metrics_callback(
     settings: Option<&ExtClassificationMetricsSettings>,
 ) -> SettingsReturnCode {
     match ClassificationMetricsSettings::set(settings.expect("Settings can not be NULL")) {
